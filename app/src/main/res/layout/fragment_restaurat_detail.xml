@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/eight_dp"
+        android:layout_marginEnd="@dimen/eight_dp"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/img_restaurant_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="@dimen/eight_dp"
+            android:gravity="center"
+            android:maxWidth="@dimen/image_max_resize"
+            android:maxHeight="@dimen/image_max_resize" />
+
+        <TextView
+            android:id="@+id/txt_restaurant_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/eight_dp"
+            android:autoSizeMaxTextSize="@dimen/txt_size_twenty_four"
+            android:autoSizeMinTextSize="@dimen/txt_size_eighteen"
+            android:ellipsize="end"
+            android:lines="1"
+            android:textColor="@color/colorPrimaryDark"
+            android:textSize="@dimen/txt_size_twenty_four"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/txt_restaurant_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/eight_dp"
+            android:autoSizeMaxTextSize="@dimen/txt_size_sixteen"
+            android:autoSizeMinTextSize="@dimen/txt_size_twelve"
+            android:ellipsize="end"
+            android:lines="1"
+            android:textColor="@color/colorPrimaryDark" />
+
+        <TextView
+            android:id="@+id/txt_restaurant_phone_number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/eight_dp"
+            android:autoSizeMaxTextSize="@dimen/txt_size_sixteen"
+            android:autoSizeMinTextSize="@dimen/txt_size_twelve"
+            android:ellipsize="end"
+            android:lines="1"
+            android:textColor="@color/colorPrimaryDark" />
+
+        <TextView
+            android:id="@+id/txt_restaurant_description"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/eight_dp"
+            android:autoSizeMaxTextSize="@dimen/txt_size_sixteen"
+            android:autoSizeMinTextSize="@dimen/txt_size_twelve"
+            android:ellipsize="end"
+            android:lines="1"
+            android:textColor="@color/colorPrimaryDark" />
+
+        <TextView
+            android:id="@+id/txt_restaurant_delivery_fee"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/eight_dp"
+            android:autoSizeMaxTextSize="@dimen/txt_size_sixteen"
+            android:autoSizeMinTextSize="@dimen/txt_size_twelve"
+            android:ellipsize="end"
+            android:lines="1"
+            android:textColor="@color/colorPrimaryDark" />
+
+        <TextView
+            android:id="@+id/txt_restaurant_yelp_rating"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/eight_dp"
+            android:autoSizeMaxTextSize="@dimen/txt_size_sixteen"
+            android:autoSizeMinTextSize="@dimen/txt_size_twelve"
+            android:ellipsize="end"
+            android:lines="1"
+            android:textColor="@color/colorPrimaryDark" />
+
+        <TextView
+            android:id="@+id/txt_restaurant_average_rating"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/eight_dp"
+            android:autoSizeMaxTextSize="@dimen/txt_size_sixteen"
+            android:autoSizeMinTextSize="@dimen/txt_size_twelve"
+            android:ellipsize="end"
+            android:lines="1"
+            android:textColor="@color/colorPrimaryDark" />
+
+    </LinearLayout>
+</ScrollView>

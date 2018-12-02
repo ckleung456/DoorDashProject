@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="phone_number">Phone number: %1$s</string>
+    <string name="delivery_fee">Delivery Fee: &#36;%1$s</string>
+    <string name="average_rating">Average rating: %1$s</string>
+    <string name="yelp_rating">Yelp rating: %1$s</string>
+</resources>

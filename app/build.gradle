@@ -1,0 +1,80 @@
+apply plugin: 'com.android.application'
+
+apply plugin: 'kotlin-android'
+
+apply plugin: 'kotlin-android-extensions'
+
+android {
+    compileSdkVersion 28
+    buildToolsVersion '28.0.3'
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+            all {
+                /*
+                 * fix for java.lang.VerifyError: Expecting a stackmap frame at branch target
+                 * libraries java mismatch
+                 */
+                jvmArgs '-noverify'
+            }
+        }
+    }
+    defaultConfig {
+        applicationId "com.ck.doordashproject"
+        minSdkVersion 26
+        targetSdkVersion 28
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+        kotlinOptions.jvmTarget = '1.8'
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    androidExtensions {
+        experimental = true
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation "androidx.appcompat:appcompat:$app_compat"
+    implementation "androidx.annotation:annotation:$android_x"
+    implementation "androidx.recyclerview:recyclerview:$android_x"
+    implementation "androidx.lifecycle:lifecycle-common-java8:$android_liftcycle"
+    implementation "androidx.constraintlayout:constraintlayout:$constraintLayout"
+    implementation "com.google.android.material:material:$material_design"
+
+    implementation "com.squareup.picasso:picasso:$picasso"
+    implementation "com.squareup.okhttp3:okhttp:$okhttp"
+    implementation "com.squareup.okhttp3:logging-interceptor:$okhttp"
+    implementation "com.squareup.retrofit2:retrofit:$retrofit"
+    implementation "com.squareup.retrofit2:converter-gson:$retrofit"
+    implementation "com.squareup.retrofit2:adapter-rxjava2:$retrofit"
+    implementation "com.google.code.gson:gson:$gson"
+    implementation "io.reactivex.rxjava2:rxjava:$rxJava"
+    implementation "io.reactivex.rxjava2:rxandroid:$rxAndroid"
+
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation "androidx.test:runner:$testRunner"
+    androidTestImplementation "androidx.test:rules:$testRunner"
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+
+    testImplementation "com.squareup.assertj:assertj-android:$assertion"
+    testImplementation "org.powermock:powermock-module-junit4:$powerMock"
+    testImplementation "org.powermock:powermock-module-junit4-rule:$powerMock"
+    testImplementation "org.powermock:powermock-api-mockito2:$powerMock"
+    testImplementation "org.powermock:powermock-classloading-xstream:$powerMock"
+    testImplementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
+    testImplementation "com.nhaarman:mockito-kotlin:$mockito_kotlin"
+    testImplementation "org.amshove.kluent:kluent:$kluent"
+}
