@@ -1,8 +1,8 @@
 package com.ck.doordashproject.features.dashboard.view
 
-import com.ck.doordashproject.base.modules.data.RestaurantDataModel
+import com.ck.doordashproject.features.dashboard.modules.viewmodel.RestaurantListViewModel
+import java.lang.ref.WeakReference
 
 interface RestaurantListView {
-    fun setRestaurants(restaurants: ArrayList<RestaurantDataModel>)
-    fun onRefreshDone()
+    fun getRestaurantListViewModel(): WeakReference<RestaurantListViewModel?>
 }

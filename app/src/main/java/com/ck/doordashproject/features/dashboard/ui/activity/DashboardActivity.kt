@@ -2,9 +2,11 @@ package com.ck.doordashproject.features.dashboard.ui.activity
 
 import android.os.Bundle
 import android.text.TextUtils
+import androidx.lifecycle.ViewModelProviders
 import com.ck.doordashproject.R
 import com.ck.doordashproject.base.modules.data.RestaurantDetailDataModel
 import com.ck.doordashproject.base.ui.BaseActivity
+import com.ck.doordashproject.features.dashboard.modules.viewmodel.RestaurantDetailViewModel
 import com.ck.doordashproject.features.dashboard.presenter.DashboardActivityPresenteImpl
 import com.ck.doordashproject.features.dashboard.presenter.DashboardActivityPresenter
 import com.ck.doordashproject.features.dashboard.ui.fragments.RestaurantDetailFragment
@@ -19,11 +21,13 @@ class DashboardActivity: BaseActivity(), DashboardActivityView {
     private var restaurantListFragment: RestaurantListFragment? = null
     private var restaurantDetailFragment: RestaurantDetailFragment? = null
     private var mPresenter: DashboardActivityPresenter? = null
+    private var mDetailViewModel: RestaurantDetailViewModel? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         mPresenter = DashboardActivityPresenteImpl(this)
+        mDetailViewModel = ViewModelProviders.of(this).get(RestaurantDetailViewModel::class.java)
         lifecycle.addObserver(mPresenter!!)
     }
 
@@ -74,10 +78,9 @@ class DashboardActivity: BaseActivity(), DashboardActivityView {
 
     override fun launchRestaurantDetail(dataModel: RestaurantDetailDataModel) {
         if (restaurantDetailFragment == null) {
-            restaurantDetailFragment = RestaurantDetailFragment.newInstance(dataModel)
-        } else {
-            restaurantDetailFragment!!.setDetailData(dataModel)
+            restaurantDetailFragment = RestaurantDetailFragment.newInstance()
         }
+        mDetailViewModel!!.setRestaurantDetail(dataModel)
         switchFragment(mVisibleFragment, restaurantDetailFragment!!, RestaurantDetailFragment.TAG)
     }
 }

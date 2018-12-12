@@ -3,6 +3,7 @@ package com.ck.doordashproject.features.dashboard.presenter
 import androidx.lifecycle.LifecycleOwner
 import com.ck.doordashproject.base.modules.data.RestaurantDataModel
 import com.ck.doordashproject.features.dashboard.modules.repository.RestaurantInteractors
+import com.ck.doordashproject.features.dashboard.modules.viewmodel.RestaurantListViewModel
 import com.ck.doordashproject.features.dashboard.view.RestaurantListView
 import com.nhaarman.mockito_kotlin.whenever
 import io.reactivex.Observable
@@ -14,13 +15,14 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
+import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.modules.junit4.PowerMockRunner
+import java.lang.ref.WeakReference
 
 @RunWith(PowerMockRunner::class)
-@PrepareForTest(CompositeDisposable::class, LifecycleOwner::class)
+@PrepareForTest(CompositeDisposable::class, LifecycleOwner::class, RestaurantListViewModel::class)
 class RestaurantListFragmentPresenterTests {
     companion object {
         val FAKE_LIST = ArrayList<RestaurantDataModel>()
@@ -30,11 +32,16 @@ class RestaurantListFragmentPresenterTests {
     private val compositeDisposableMock: CompositeDisposable = mock()
     private val interactorMock: RestaurantInteractors = mock()
     private val lifecycleOwnerMock: LifecycleOwner = mock()
+    private val weakReferenceMock: WeakReference<RestaurantListViewModel?> = mock()
+    private var viewModelMock: RestaurantListViewModel? = null
 
     private var underTests: RestaurantListFragmentPresenter? = null
 
     @Before
     fun `setup tests`() {
+        viewModelMock = PowerMockito.mock(RestaurantListViewModel::class.java)
+        whenever(weakReferenceMock.get()).thenReturn(null)
+        whenever(viewMock.getRestaurantListViewModel()).thenReturn(weakReferenceMock)
         whenever(interactorMock.getRestaurantNearBy(RestaurantListFragmentPresenterImpl.DOOR_DASH_LAT, RestaurantListFragmentPresenterImpl.DOOR_DASH_LNG))
                 .thenReturn(Observable.just(FAKE_LIST))
         underTests = RestaurantListFragmentPresenterImpl(viewMock, compositeDisposableMock, interactorMock)
@@ -49,8 +56,10 @@ class RestaurantListFragmentPresenterTests {
     fun `test on start`() {
         underTests!!.onStart(lifecycleOwnerMock)
         verify(compositeDisposableMock).add(any(Disposable::class))
-        verify(viewMock).setRestaurants(FAKE_LIST)
-        verify(viewMock, never()).onRefreshDone()
+
+        whenever(weakReferenceMock.get()).thenReturn(viewModelMock)
+        underTests!!.onStart(lifecycleOwnerMock)
+        verify(viewModelMock)!!.setRestaurants(FAKE_LIST)
     }
 
     @Test
@@ -63,8 +72,10 @@ class RestaurantListFragmentPresenterTests {
     fun `test resfresh`() {
         underTests!!.refresh()
         verify(compositeDisposableMock).add(any(Disposable::class))
-        verify(viewMock).setRestaurants(FAKE_LIST)
-        verify(viewMock).onRefreshDone()
+
+        whenever(weakReferenceMock.get()).thenReturn(viewModelMock)
+        underTests!!.onStart(lifecycleOwnerMock)
+        verify(viewModelMock)!!.setRestaurants(FAKE_LIST)
     }
 
 }

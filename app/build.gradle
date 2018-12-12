@@ -50,6 +50,8 @@ dependencies {
     implementation "androidx.annotation:annotation:$android_x"
     implementation "androidx.recyclerview:recyclerview:$android_x"
     implementation "androidx.lifecycle:lifecycle-common-java8:$android_liftcycle"
+    implementation "androidx.lifecycle:lifecycle-extensions:$android_liftcycle"
+    implementation "androidx.lifecycle:lifecycle-viewmodel:$android_liftcycle"
     implementation "androidx.constraintlayout:constraintlayout:$constraintLayout"
     implementation "com.google.android.material:material:$material_design"
 

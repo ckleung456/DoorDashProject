@@ -30,7 +30,7 @@ class RestaurantListFragmentPresenterImpl: RestaurantListFragmentPresenter {
     }
 
     override fun onStart(owner: LifecycleOwner) {
-        subscribeGetRestaurants(false)
+        subscribeGetRestaurants()
     }
 
     override fun onStop(owner: LifecycleOwner) {
@@ -38,18 +38,14 @@ class RestaurantListFragmentPresenterImpl: RestaurantListFragmentPresenter {
     }
 
     override fun refresh() {
-        subscribeGetRestaurants(true)
+        subscribeGetRestaurants()
     }
 
-    private fun subscribeGetRestaurants(stopLoader: Boolean) {
+    private fun subscribeGetRestaurants() {
         compositeDisposable.add(interactor
                 .getRestaurantNearBy(DOOR_DASH_LAT, DOOR_DASH_LNG)
                 .subscribe({
-                    list ->
-                    view.setRestaurants(list)
-                    if (stopLoader) {
-                        view.onRefreshDone()
-                    }
+                    view.getRestaurantListViewModel().get()?.setRestaurants(it)
                 }, { e -> Log.e(TAG, e.message, e)}))
     }
 }

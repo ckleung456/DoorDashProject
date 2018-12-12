@@ -3,7 +3,6 @@ package com.ck.doordashproject.features.dashboard.presenter
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import androidx.annotation.VisibleForTesting
-import androidx.lifecycle.LifecycleOwner
 import com.ck.doordashproject.base.modules.data.RestaurantDetailDataModel
 import com.ck.doordashproject.base.utils.ImageUtils
 import com.ck.doordashproject.features.dashboard.view.RestaurantDetailFragmentView
@@ -30,13 +29,7 @@ class RestaurantDetailFragmentPresenterImpl: RestaurantDetailFragmentPresenter, 
         mView = view
         mImageUtils = imageUtils
     }
-
-    override fun onStart(owner: LifecycleOwner) {
-        if (mData != null) {
-            mImageUtils.loadLogo(mData!!.cover_img_url, this)
-        }
-    }
-
+    
     override fun onPrepareLoad(placeHolderDrawable: Drawable?) {
         if (placeHolderDrawable != null) {
             mView.setRestaurantLogo(placeHolderDrawable)
@@ -60,6 +53,7 @@ class RestaurantDetailFragmentPresenterImpl: RestaurantDetailFragmentPresenter, 
 
     override fun setDetail(detailDataModel: RestaurantDetailDataModel) {
         mData = detailDataModel
+        mImageUtils.loadLogo(mData!!.cover_img_url, this)
     }
 
     private fun setViewData() {

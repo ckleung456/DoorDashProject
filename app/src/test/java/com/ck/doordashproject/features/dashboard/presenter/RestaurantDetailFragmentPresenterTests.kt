@@ -2,11 +2,13 @@ package com.ck.doordashproject.features.dashboard.presenter
 
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
-import androidx.lifecycle.LifecycleOwner
 import com.ck.doordashproject.base.modules.data.RestaurantDetailDataModel
 import com.ck.doordashproject.base.utils.ImageUtils
 import com.ck.doordashproject.features.dashboard.view.RestaurantDetailFragmentView
-import com.nhaarman.mockito_kotlin.*
+import com.nhaarman.mockito_kotlin.never
+import com.nhaarman.mockito_kotlin.times
+import com.nhaarman.mockito_kotlin.verify
+import com.nhaarman.mockito_kotlin.whenever
 import org.amshove.kluent.any
 import org.amshove.kluent.mock
 import org.assertj.core.api.Assertions.assertThat
@@ -19,7 +21,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.modules.junit4.PowerMockRunner
 
 @RunWith(PowerMockRunner::class)
-@PrepareForTest(RestaurantDetailDataModel::class, LifecycleOwner::class, ImageUtils::class, Bitmap::class)
+@PrepareForTest(RestaurantDetailDataModel::class, ImageUtils::class, Bitmap::class)
 class RestaurantDetailFragmentPresenterTests {
     companion object {
         private const val FAKE_URL = "fake url"
@@ -41,7 +43,6 @@ class RestaurantDetailFragmentPresenterTests {
 
     private val viewMock: RestaurantDetailFragmentView = mock()
     private var imageUtilsMock: ImageUtils? = null
-    private val lifecycleOwnerMock: LifecycleOwner = mock()
     private val drawableMock: Drawable = mock()
     private val bitmapMock: Bitmap = mock()
 
@@ -70,20 +71,11 @@ class RestaurantDetailFragmentPresenterTests {
     }
 
     @Test
-    fun `test on start`() {
-        underTest!!.onStart(lifecycleOwnerMock)
-        verifyZeroInteractions(imageUtilsMock!!)
-
-        underTest!!.setDetail(dataModelMock!!)
-        underTest!!.onStart(lifecycleOwnerMock)
-        verify(imageUtilsMock)!!.loadLogo(FAKE_URL, underTest!!)
-    }
-
-    @Test
-    fun `test set data modle`() {
+    fun `test set data model`() {
         assertThat(underTest!!.mData).isNull()
         underTest!!.setDetail(dataModelMock!!)
         assertThat(underTest!!.mData).isEqualTo(dataModelMock!!)
+        verify(imageUtilsMock)!!.loadLogo(FAKE_URL, underTest!!)
     }
 
     @Test
