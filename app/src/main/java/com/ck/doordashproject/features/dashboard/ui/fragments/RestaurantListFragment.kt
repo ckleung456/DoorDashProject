@@ -85,7 +85,10 @@ class RestaurantListFragment: Fragment(), RestaurantListView {
 
     override fun onDestroy() {
         super.onDestroy()
-        lifecycle.removeObserver(mPresenter!!)
+        if (mPresenter != null) {
+            lifecycle.removeObserver(mPresenter!!)
+            mPresenter = null
+        }
         mViewModel.observeRestaurantsList().removeObservers(this)
         mAppNotificationViewModel.observeErrorNotification().removeObservers(this)
     }

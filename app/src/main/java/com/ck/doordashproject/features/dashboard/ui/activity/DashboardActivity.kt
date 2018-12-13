@@ -39,8 +39,10 @@ class DashboardActivity : BaseActivity(), DashboardActivityView {
 
     override fun onDestroy() {
         super.onDestroy()
-        lifecycle.removeObserver(mPresenter!!)
-        mPresenter = null
+        if (mPresenter != null) {
+            lifecycle.removeObserver(mPresenter!!)
+            mPresenter = null
+        }
         restaurantListFragment = null
         restaurantDetailFragment = null
     }

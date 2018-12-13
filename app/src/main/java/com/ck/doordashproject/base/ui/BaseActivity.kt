@@ -29,6 +29,11 @@ abstract class BaseActivity: AppCompatActivity() {
         })
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        appNotificationViewModel.observeErrorNotification().removeObservers(this)
+    }
+
     fun switchFragment(fromFragment: Fragment?, toFragment: Fragment, toFragmentTag: String) {
         if (TextUtils.isEmpty(mVisibleFragmentTag) || !TextUtils.equals(mVisibleFragmentTag, toFragmentTag)) {
             mVisibleFragmentTag = toFragmentTag
