@@ -40,10 +40,8 @@ abstract class BaseActivity : AppCompatActivity() {
                 getEntryFragmentTag()
             else
                 backStackEntry?.name!! //update current fragment tag back to previous tag
-            if (isFragmentInBackStack(tag)) {
-                supportFragmentManager.popBackStackImmediate(tag, FragmentManager.POP_BACK_STACK_INCLUSIVE)
-            }
-            switchFragment(getSelectedFragment(tag), tag)
+            mCurrentFragment = getSelectedFragment(tag)
+            supportFragmentManager.popBackStackImmediate(tag, FragmentManager.POP_BACK_STACK_INCLUSIVE)
         }
     }
 
@@ -56,6 +54,9 @@ abstract class BaseActivity : AppCompatActivity() {
         if (toFragment != mCurrentFragment) {
             val ft = supportFragmentManager.beginTransaction()
             if (mCurrentFragment != null) {
+                if (isFragmentInBackStack(toFragmentTag)) {
+                    supportFragmentManager.popBackStackImmediate(toFragmentTag, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+                }
                 ft.hide(mCurrentFragment!!).addToBackStack(toFragmentTag)
             }
             ft.setCustomAnimations(
