@@ -1,7 +1,7 @@
 package com.ck.doordashproject.features.dashboard.ui.activity
 
 import android.os.Bundle
-import android.text.TextUtils
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import com.ck.doordashproject.R
 import com.ck.doordashproject.base.ui.BaseActivity
@@ -30,13 +30,6 @@ class DashboardActivity : BaseActivity(), DashboardActivityView {
         lifecycle.addObserver(mPresenter!!)
     }
 
-    override fun onBackPressed() {
-        if (handleBackPressed()) {
-            return
-        }
-        super.onBackPressed()
-    }
-
     override fun onDestroy() {
         super.onDestroy()
         if (mPresenter != null) {
@@ -51,15 +44,11 @@ class DashboardActivity : BaseActivity(), DashboardActivityView {
         return R.id.lContainer
     }
 
-    override fun setSelectedFragment() {
-        if (TextUtils.isEmpty(mVisibleFragmentTag)) {
-            mVisibleFragmentTag = getEntryFragmentTag()
+    override fun getSelectedFragment(toTag: String): Fragment {
+        if (toTag == RestaurantDetailFragment.TAG) {
+            return restaurantDetailFragment!!
         }
-        if (TextUtils.equals(mVisibleFragmentTag, RestaurantListFragment.TAG)) {
-            mVisibleFragment = restaurantListFragment
-        } else if (TextUtils.equals(mVisibleFragmentTag, RestaurantDetailFragment.TAG)) {
-            mVisibleFragment = restaurantDetailFragment
-        }
+        return restaurantListFragment!!
     }
 
     override fun getEntryFragmentTag(): String {
@@ -74,13 +63,13 @@ class DashboardActivity : BaseActivity(), DashboardActivityView {
         if (restaurantListFragment == null) {
             restaurantListFragment = RestaurantListFragment.newInstance()
         }
-        switchFragment(mVisibleFragment, restaurantListFragment!!, RestaurantListFragment.TAG)
+        switchFragment(restaurantListFragment!!, RestaurantListFragment.TAG)
     }
 
     override fun launchRestaurantDetail() {
         if (restaurantDetailFragment == null) {
             restaurantDetailFragment = RestaurantDetailFragment.newInstance()
         }
-        switchFragment(mVisibleFragment, restaurantDetailFragment!!, RestaurantDetailFragment.TAG)
+        switchFragment(restaurantDetailFragment!!, RestaurantDetailFragment.TAG)
     }
 }

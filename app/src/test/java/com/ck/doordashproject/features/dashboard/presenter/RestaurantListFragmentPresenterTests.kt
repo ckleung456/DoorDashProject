@@ -85,7 +85,7 @@ class RestaurantListFragmentPresenterTests {
 
     @Test
     fun `test on stop`() {
-        underTests!!.onStop(lifecycleOwnerMock)
+        underTests!!.onDestroy(lifecycleOwnerMock)
         verify(compositeDisposableMock).clear()
     }
 

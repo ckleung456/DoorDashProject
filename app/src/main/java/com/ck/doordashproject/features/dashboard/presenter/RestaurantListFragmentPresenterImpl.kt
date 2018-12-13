@@ -47,6 +47,10 @@ class RestaurantListFragmentPresenterImpl : RestaurantListFragmentPresenter {
         compositeDisposable.clear()
     }
 
+    override fun onDestroy(owner: LifecycleOwner) {
+        compositeDisposable.clear()
+    }
+
     override fun refresh() {
         subscribeGetRestaurants()
     }
