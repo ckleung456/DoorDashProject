@@ -1,4 +1,4 @@
-package com.ck.doordashproject.features.dashboard.modules.actions
+package com.ck.doordashproject.features.dashboard.models.actions
 
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers

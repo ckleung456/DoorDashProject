@@ -3,9 +3,9 @@ package com.ck.doordashproject.features.dashboard.presenter
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import androidx.annotation.VisibleForTesting
-import com.ck.doordashproject.base.modules.data.RestaurantDataModel
+import com.ck.doordashproject.base.models.data.restaurants.RestaurantDataModel
 import com.ck.doordashproject.base.utils.ImageUtils
-import com.ck.doordashproject.features.dashboard.modules.actions.RestaurantActionEventModel
+import com.ck.doordashproject.features.dashboard.models.actions.RestaurantActionEventModel
 import com.ck.doordashproject.features.dashboard.view.RestaurantViewHolderView
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target

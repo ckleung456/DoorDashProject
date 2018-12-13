@@ -10,7 +10,8 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ck.doordashproject.R
-import com.ck.doordashproject.features.dashboard.modules.viewmodel.RestaurantListViewModel
+import com.ck.doordashproject.base.models.viewmodels.appnotification.AppNotificationViewModel
+import com.ck.doordashproject.features.dashboard.models.viewmodel.RestaurantListViewModel
 import com.ck.doordashproject.features.dashboard.presenter.RestaurantListFragmentPresenter
 import com.ck.doordashproject.features.dashboard.presenter.RestaurantListFragmentPresenterImpl
 import com.ck.doordashproject.features.dashboard.ui.adapters.RestaurantAdapter
@@ -21,16 +22,18 @@ import java.lang.ref.WeakReference
 class RestaurantListFragment: Fragment(), RestaurantListView {
     companion object {
         val TAG = RestaurantListFragment::class.java.name
+        private const val SOMETHING_WENT_WRONG = "Something went wrong on "
 
         fun newInstance(): RestaurantListFragment {
             return RestaurantListFragment()
         }
     }
 
-    private var mAdatper: RestaurantAdapter? = null
+    private var mAdapter: RestaurantAdapter? = null
     private var mPresenter: RestaurantListFragmentPresenter? = null
     private var mLinearLayoutManager: LinearLayoutManager? = null
-    private var mViewModel: RestaurantListViewModel? = null
+    private lateinit var mViewModel: RestaurantListViewModel
+    private lateinit var mAppNotificationViewModel: AppNotificationViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,10 +53,10 @@ class RestaurantListFragment: Fragment(), RestaurantListView {
             mLinearLayoutManager = LinearLayoutManager(context)
             list_restaurants.layoutManager = mLinearLayoutManager
         }
-        if (mAdatper == null) {
-            mAdatper = RestaurantAdapter()
+        if (mAdapter == null) {
+            mAdapter = RestaurantAdapter()
         }
-        list_restaurants.adapter = mAdatper
+        list_restaurants.adapter = mAdapter
         list_restaurants.setHasFixedSize(true)
         val decoration = DividerItemDecoration(context, DividerItemDecoration.HORIZONTAL)
         list_restaurants.addItemDecoration(decoration)
@@ -64,23 +67,34 @@ class RestaurantListFragment: Fragment(), RestaurantListView {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        mViewModel = activity?.run {
-            ViewModelProviders.of(this).get(RestaurantListViewModel::class.java)
-        }
-        mViewModel!!.getRestaurants().observe(this, Observer {
-            mAdatper?.setRestaurants(it)
-            if (list_refresh.isRefreshing) {
-                list_refresh.isRefreshing = false
-            }
+        activity?.run {
+            mViewModel = ViewModelProviders.of(this).get(RestaurantListViewModel::class.java)
+            mAppNotificationViewModel = ViewModelProviders.of(this).get(AppNotificationViewModel::class.java)
+        } ?: throw Exception(SOMETHING_WENT_WRONG.plus(TAG))
+
+        mViewModel.observeRestaurantsList().observe(this, Observer {
+                list ->
+            mAdapter?.setRestaurants(list)
+            list_refresh.isRefreshing = false
+        })
+
+        mAppNotificationViewModel.observeErrorNotification().observe(this, Observer {
+            list_refresh.isRefreshing = false
         })
     }
 
     override fun onDestroy() {
         super.onDestroy()
         lifecycle.removeObserver(mPresenter!!)
+        mViewModel.observeRestaurantsList().removeObservers(this)
+        mAppNotificationViewModel.observeErrorNotification().removeObservers(this)
     }
 
-    override fun getRestaurantListViewModel(): WeakReference<RestaurantListViewModel?> {
+    override fun getAppNotificationViewModel(): WeakReference<AppNotificationViewModel> {
+        return WeakReference(mAppNotificationViewModel)
+    }
+
+    override fun getRestaurantListViewModel(): WeakReference<RestaurantListViewModel> {
         return WeakReference(mViewModel)
     }
 }

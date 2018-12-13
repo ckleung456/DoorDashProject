@@ -1,8 +1,8 @@
-package com.ck.doordashproject.features.dashboard.modules.repository
+package com.ck.doordashproject.features.dashboard.models.repository
 
 import androidx.annotation.NonNull
-import com.ck.doordashproject.base.modules.data.RestaurantDataModel
-import com.ck.doordashproject.base.modules.data.RestaurantDetailDataModel
+import com.ck.doordashproject.base.models.data.restaurants.RestaurantDataModel
+import com.ck.doordashproject.base.models.data.restaurants.RestaurantDetailDataModel
 import io.reactivex.Observable
 
 interface RestaurantInteractors {

@@ -1,7 +1,7 @@
 package com.ck.doordashproject.base.network
 
-import com.ck.doordashproject.base.modules.data.RestaurantDataModel
-import com.ck.doordashproject.base.modules.data.RestaurantDetailDataModel
+import com.ck.doordashproject.base.models.data.restaurants.RestaurantDataModel
+import com.ck.doordashproject.base.models.data.restaurants.RestaurantDetailDataModel
 import io.reactivex.Observable
 import retrofit2.Response
 import retrofit2.http.GET

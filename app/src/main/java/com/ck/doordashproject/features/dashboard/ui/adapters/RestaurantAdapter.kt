@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.ck.doordashproject.R
-import com.ck.doordashproject.base.modules.data.RestaurantDataModel
+import com.ck.doordashproject.base.models.data.restaurants.RestaurantDataModel
 import com.ck.doordashproject.features.dashboard.presenter.RestaurantAdatperPresenter
 import com.ck.doordashproject.features.dashboard.presenter.RestaurantAdapterPresenterImpl
 import com.ck.doordashproject.features.dashboard.ui.viewholders.RestaurantViewHolder

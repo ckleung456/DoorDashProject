@@ -10,7 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.ck.doordashproject.R
-import com.ck.doordashproject.features.dashboard.modules.viewmodel.RestaurantDetailViewModel
+import com.ck.doordashproject.features.dashboard.models.viewmodel.RestaurantDetailViewModel
 import com.ck.doordashproject.features.dashboard.presenter.RestaurantDetailFragmentPresenter
 import com.ck.doordashproject.features.dashboard.presenter.RestaurantDetailFragmentPresenterImpl
 import com.ck.doordashproject.features.dashboard.view.RestaurantDetailFragmentView
@@ -19,13 +19,14 @@ import kotlinx.android.synthetic.main.fragment_restaurat_detail.*
 class RestaurantDetailFragment: Fragment(), RestaurantDetailFragmentView {
     companion object {
         val TAG = RestaurantDetailFragment::class.java.name
+        private const val SOMETHING_WENT_WRONG = "Something went wrong on "
         fun newInstance(): RestaurantDetailFragment {
             return RestaurantDetailFragment()
         }
     }
 
     private var mPresenter: RestaurantDetailFragmentPresenter? = null
-    private var mDetailViewModel: RestaurantDetailViewModel? = null
+    private lateinit var mDetailViewModel: RestaurantDetailViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,8 +43,8 @@ class RestaurantDetailFragment: Fragment(), RestaurantDetailFragmentView {
         super.onActivityCreated(savedInstanceState)
         mDetailViewModel = activity?.run {
             ViewModelProviders.of(this).get(RestaurantDetailViewModel::class.java)
-        }
-        mDetailViewModel?.getRestaurantDetail()?.observe(this, Observer {
+        } ?: throw Exception(SOMETHING_WENT_WRONG.plus(TAG))
+        mDetailViewModel.observeRestaurantDetail().observe(this, Observer {
             mPresenter?.setDetail(it)
         })
     }
@@ -51,6 +52,7 @@ class RestaurantDetailFragment: Fragment(), RestaurantDetailFragmentView {
     override fun onDestroy() {
         super.onDestroy()
         mPresenter = null
+        mDetailViewModel.observeRestaurantDetail().removeObservers(this)
     }
 
     override fun setRestaurantLogo(drawable: Drawable) {

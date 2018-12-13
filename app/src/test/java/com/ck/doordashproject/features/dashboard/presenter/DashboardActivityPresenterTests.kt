@@ -1,14 +1,16 @@
 package com.ck.doordashproject.features.dashboard.presenter
 
 import androidx.lifecycle.LifecycleOwner
-import com.ck.doordashproject.base.modules.data.RestaurantDetailDataModel
-import com.ck.doordashproject.features.dashboard.modules.actions.RestaurantActionEventModel
-import com.ck.doordashproject.features.dashboard.modules.repository.RestaurantInteractors
+import androidx.lifecycle.MutableLiveData
+import com.ck.doordashproject.R
+import com.ck.doordashproject.base.models.data.restaurants.RestaurantDetailDataModel
+import com.ck.doordashproject.base.models.viewmodels.appnotification.AppNotificationViewModel
+import com.ck.doordashproject.base.network.RetrofitException
+import com.ck.doordashproject.features.dashboard.models.actions.RestaurantActionEventModel
+import com.ck.doordashproject.features.dashboard.models.repository.RestaurantInteractors
+import com.ck.doordashproject.features.dashboard.models.viewmodel.RestaurantDetailViewModel
 import com.ck.doordashproject.features.dashboard.view.DashboardActivityView
-import com.nhaarman.mockito_kotlin.any
-import com.nhaarman.mockito_kotlin.times
-import com.nhaarman.mockito_kotlin.verify
-import com.nhaarman.mockito_kotlin.whenever
+import com.nhaarman.mockito_kotlin.*
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import org.amshove.kluent.mock
@@ -21,25 +23,48 @@ import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.modules.junit4.PowerMockRunner
 
 @RunWith(PowerMockRunner::class)
-@PrepareForTest(CompositeDisposable::class, LifecycleOwner::class, RestaurantActionEventModel::class, RestaurantDetailDataModel::class)
+@PrepareForTest(
+    CompositeDisposable::class,
+    LifecycleOwner::class,
+    RestaurantActionEventModel::class,
+    RestaurantDetailDataModel::class,
+    RestaurantDetailViewModel::class,
+    AppNotificationViewModel::class,
+    RetrofitException::class
+)
 class DashboardActivityPresenterTests {
     companion object {
         private const val FAKE_ID = 1L
     }
 
     private val viewMock: DashboardActivityView = mock()
+    private lateinit var detailViewModel: RestaurantDetailViewModel
+    private lateinit var appNotificationViewModel: AppNotificationViewModel
     private val compositeDisposableMock: CompositeDisposable = mock()
     private val interactorMock: RestaurantInteractors = mock()
-    private var actionEventModelMock: RestaurantActionEventModel? = null
+    private lateinit var actionEventModelMock: RestaurantActionEventModel
     private val lifecycleOwnerMock: LifecycleOwner = mock()
     private val restaurantDetailDataModelMock: RestaurantDetailDataModel = mock()
+    private var mutableLiveDataMock: MutableLiveData<RestaurantDetailDataModel> = mock()
+    private lateinit var retrofitExceptionMock: RetrofitException
 
     private var underTests: DashboardActivityPresenter? = null
 
     @Before
     fun `setup tests`() {
+        detailViewModel = PowerMockito.mock(RestaurantDetailViewModel::class.java)
+        appNotificationViewModel = PowerMockito.mock(AppNotificationViewModel::class.java)
         actionEventModelMock = PowerMockito.mock(RestaurantActionEventModel::class.java)
-        underTests = DashboardActivityPresenteImpl(viewMock, compositeDisposableMock, interactorMock, actionEventModelMock!!)
+        retrofitExceptionMock = PowerMockito.mock(RetrofitException::class.java)
+        whenever(detailViewModel.observeRestaurantDetail()).thenReturn(mutableLiveDataMock)
+        underTests = DashboardActivityPresenteImpl(
+            viewMock,
+            detailViewModel,
+            appNotificationViewModel,
+            compositeDisposableMock,
+            interactorMock,
+            actionEventModelMock
+        )
     }
 
     @After
@@ -48,26 +73,46 @@ class DashboardActivityPresenterTests {
     }
 
     @Test
-    fun `test on start`() {
-        whenever(actionEventModelMock!!.observeShowRestaurantById()).thenReturn(Observable.just(FAKE_ID))
+    fun `test on create`() {
+        whenever(actionEventModelMock.observeShowRestaurantById()).thenReturn(Observable.just(FAKE_ID))
         whenever(interactorMock.getRestaurantDetail(FAKE_ID)).thenReturn(Observable.just(restaurantDetailDataModelMock))
-        underTests!!.onStart(lifecycleOwnerMock)
+        underTests!!.onCreate(lifecycleOwnerMock)
         verify(viewMock).launchRestaurantsList()
         verify(compositeDisposableMock, times(2)).add(any())
-        verify(actionEventModelMock)!!.observeShowRestaurantById()
+        verify(actionEventModelMock).observeShowRestaurantById()
         verify(interactorMock).getRestaurantDetail(FAKE_ID)
-        verify(viewMock).launchRestaurantDetail(restaurantDetailDataModelMock)
-    }
+        verify(viewMock).launchRestaurantDetail()
+        verify(detailViewModel).setRestaurantDetail(restaurantDetailDataModelMock)
+        verifyZeroInteractions(appNotificationViewModel)
 
-    @Test
-    fun `test on stop`() {
-        underTests!!.onStop(lifecycleOwnerMock)
-        verify(compositeDisposableMock).clear()
+        whenever(interactorMock.getRestaurantDetail(FAKE_ID)).thenReturn(Observable.error(retrofitExceptionMock))
+        whenever(retrofitExceptionMock.getKind()).thenReturn(RetrofitException.Kind.CONVERSION)
+        underTests!!.onCreate(lifecycleOwnerMock)
+        verifyZeroInteractions(appNotificationViewModel)
+
+        whenever(retrofitExceptionMock.getKind()).thenReturn(RetrofitException.Kind.UNEXPECTED)
+        underTests!!.onCreate(lifecycleOwnerMock)
+        verifyZeroInteractions(appNotificationViewModel)
+
+        whenever(retrofitExceptionMock.getKind()).thenReturn(RetrofitException.Kind.HTTP)
+        underTests!!.onCreate(lifecycleOwnerMock)
+        verifyZeroInteractions(appNotificationViewModel)
+
+        whenever(retrofitExceptionMock.getKind()).thenReturn(RetrofitException.Kind.NETWORK)
+        underTests!!.onCreate(lifecycleOwnerMock)
+        verify(viewMock, times(5)).launchRestaurantsList()
+        verify(compositeDisposableMock, times(10)).add(any())
+        verify(actionEventModelMock, times(5)).observeShowRestaurantById()
+        verify(interactorMock, times(5)).getRestaurantDetail(FAKE_ID)
+        verify(viewMock).launchRestaurantDetail()
+        verify(detailViewModel).setRestaurantDetail(restaurantDetailDataModelMock)
+        verify(appNotificationViewModel).setErrorNotification(R.string.network_error)
     }
 
     @Test
     fun `test on destroy`() {
         underTests!!.onDestroy(lifecycleOwnerMock)
         verify(compositeDisposableMock).clear()
+        verify(mutableLiveDataMock).removeObservers(lifecycleOwnerMock)
     }
 }

@@ -2,7 +2,7 @@ package com.ck.doordashproject.features.dashboard.utils
 
 import android.os.Bundle
 import androidx.recyclerview.widget.DiffUtil
-import com.ck.doordashproject.base.modules.data.RestaurantDataModel
+import com.ck.doordashproject.base.models.data.restaurants.RestaurantDataModel
 
 class RestaurantsDiffCallback(val oldList: ArrayList<RestaurantDataModel>, val newList: ArrayList<RestaurantDataModel>): DiffUtil.Callback(){
     companion object {

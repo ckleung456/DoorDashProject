@@ -2,9 +2,9 @@ package com.ck.doordashproject.features.dashboard.presenter
 
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
-import com.ck.doordashproject.base.modules.data.RestaurantDataModel
+import com.ck.doordashproject.base.models.data.restaurants.RestaurantDataModel
 import com.ck.doordashproject.base.utils.ImageUtils
-import com.ck.doordashproject.features.dashboard.modules.actions.RestaurantActionEventModel
+import com.ck.doordashproject.features.dashboard.models.actions.RestaurantActionEventModel
 import com.ck.doordashproject.features.dashboard.view.RestaurantViewHolderView
 import com.nhaarman.mockito_kotlin.times
 import com.nhaarman.mockito_kotlin.verify

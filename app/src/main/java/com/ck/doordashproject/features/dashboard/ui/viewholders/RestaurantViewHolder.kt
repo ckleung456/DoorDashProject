@@ -4,8 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
-import com.ck.doordashproject.R
-import com.ck.doordashproject.base.modules.data.RestaurantDataModel
+import com.ck.doordashproject.base.models.data.restaurants.RestaurantDataModel
 import com.ck.doordashproject.features.dashboard.presenter.RestaurantViewHolderPresenter
 import com.ck.doordashproject.features.dashboard.presenter.RestaurantViewHolderPresenterImpl
 import com.ck.doordashproject.features.dashboard.view.RestaurantViewHolderView
@@ -37,10 +36,6 @@ class RestaurantViewHolder(itemView: View): RecyclerView.ViewHolder(itemView), R
 
     override fun setRestaurantStatus(status: String) {
         itemView.txt_restaurant_status.text = status
-    }
-
-    override fun getResize(): Int {
-        return itemView.context.resources.getDimension(R.dimen.image_resize).toInt()
     }
 
     override fun onClick(v: View?) {

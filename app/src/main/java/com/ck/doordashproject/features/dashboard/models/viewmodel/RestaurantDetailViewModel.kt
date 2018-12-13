@@ -1,13 +1,13 @@
-package com.ck.doordashproject.features.dashboard.modules.viewmodel
+package com.ck.doordashproject.features.dashboard.models.viewmodel
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.ck.doordashproject.base.modules.data.RestaurantDetailDataModel
+import com.ck.doordashproject.base.models.data.restaurants.RestaurantDetailDataModel
 
 class RestaurantDetailViewModel: ViewModel() {
     private val restaurantDetailDataViewModel = MutableLiveData<RestaurantDetailDataModel>()
 
-    fun getRestaurantDetail(): MutableLiveData<RestaurantDetailDataModel> {
+    fun observeRestaurantDetail(): MutableLiveData<RestaurantDetailDataModel> {
         return restaurantDetailDataViewModel
     }
 

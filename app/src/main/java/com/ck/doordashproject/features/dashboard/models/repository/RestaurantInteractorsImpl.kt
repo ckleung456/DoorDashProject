@@ -1,8 +1,8 @@
-package com.ck.doordashproject.features.dashboard.modules.repository
+package com.ck.doordashproject.features.dashboard.models.repository
 
 import androidx.annotation.VisibleForTesting
-import com.ck.doordashproject.base.modules.data.RestaurantDataModel
-import com.ck.doordashproject.base.modules.data.RestaurantDetailDataModel
+import com.ck.doordashproject.base.models.data.restaurants.RestaurantDataModel
+import com.ck.doordashproject.base.models.data.restaurants.RestaurantDetailDataModel
 import com.ck.doordashproject.base.network.DoorDashService
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -36,7 +36,18 @@ class RestaurantInteractorsImpl : RestaurantInteractors {
         return mService.service.fetchRestaurantDetail(restaurantId)
                 .map { response ->
                     if (response.body() == null) {
-                        RestaurantDetailDataModel(Long.MIN_VALUE, "", Long.MIN_VALUE, Double.MIN_VALUE, "", "", Double.MIN_VALUE, "", "", "")
+                        RestaurantDetailDataModel(
+                            Long.MIN_VALUE,
+                            "",
+                            Long.MIN_VALUE,
+                            Double.MIN_VALUE,
+                            "",
+                            "",
+                            Double.MIN_VALUE,
+                            "",
+                            "",
+                            ""
+                        )
                     } else {
                         response.body()!!
                     }

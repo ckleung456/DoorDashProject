@@ -1,11 +1,16 @@
 package com.ck.doordashproject.base.ui
 
+import android.os.Bundle
 import android.text.TextUtils
 import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import com.ck.doordashproject.R
+import com.ck.doordashproject.base.models.viewmodels.appnotification.AppNotificationViewModel
 
 abstract class BaseActivity: AppCompatActivity() {
     companion object {
@@ -14,6 +19,15 @@ abstract class BaseActivity: AppCompatActivity() {
     }
     var mVisibleFragment: Fragment? = null
     var mVisibleFragmentTag: String? = ""
+    protected lateinit var appNotificationViewModel: AppNotificationViewModel
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        appNotificationViewModel = ViewModelProviders.of(this).get(AppNotificationViewModel::class.java)
+        appNotificationViewModel.observeErrorNotification().observe(this, Observer {
+            Toast.makeText(this, it, Toast.LENGTH_LONG).show()
+        })
+    }
 
     fun switchFragment(fromFragment: Fragment?, toFragment: Fragment, toFragmentTag: String) {
         if (TextUtils.isEmpty(mVisibleFragmentTag) || !TextUtils.equals(mVisibleFragmentTag, toFragmentTag)) {

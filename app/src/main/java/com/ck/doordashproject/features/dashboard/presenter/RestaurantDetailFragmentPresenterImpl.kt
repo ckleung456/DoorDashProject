@@ -3,33 +3,37 @@ package com.ck.doordashproject.features.dashboard.presenter
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import androidx.annotation.VisibleForTesting
-import com.ck.doordashproject.base.modules.data.RestaurantDetailDataModel
+import com.ck.doordashproject.base.models.data.restaurants.RestaurantDetailDataModel
 import com.ck.doordashproject.base.utils.ImageUtils
 import com.ck.doordashproject.features.dashboard.view.RestaurantDetailFragmentView
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
 
-class RestaurantDetailFragmentPresenterImpl: RestaurantDetailFragmentPresenter, Target {
+class RestaurantDetailFragmentPresenterImpl : RestaurantDetailFragmentPresenter, Target {
     companion object {
         const val RATIO = 100.0
     }
+
     private val mView: RestaurantDetailFragmentView
     private val mImageUtils: ImageUtils
 
     @VisibleForTesting
     var mData: RestaurantDetailDataModel? = null
 
-    constructor(view: RestaurantDetailFragmentView): this(
-            view,
-            ImageUtils.INSTANCE
+    constructor(view: RestaurantDetailFragmentView) : this(
+        view,
+        ImageUtils.INSTANCE
     )
 
     @VisibleForTesting
-    constructor(view: RestaurantDetailFragmentView, imageUtils: ImageUtils) {
+    constructor(
+        view: RestaurantDetailFragmentView,
+        imageUtils: ImageUtils
+    ) {
         mView = view
         mImageUtils = imageUtils
     }
-    
+
     override fun onPrepareLoad(placeHolderDrawable: Drawable?) {
         if (placeHolderDrawable != null) {
             mView.setRestaurantLogo(placeHolderDrawable)
@@ -67,6 +71,6 @@ class RestaurantDetailFragmentPresenterImpl: RestaurantDetailFragmentPresenter, 
     }
 
     private fun convertCenToDollar(fee: Long): Double {
-        return fee/RATIO
+        return fee / RATIO
     }
 }

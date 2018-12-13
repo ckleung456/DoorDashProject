@@ -1,14 +1,15 @@
 package com.ck.doordashproject.features.dashboard.presenter
 
-import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LifecycleOwner
-import com.ck.doordashproject.features.dashboard.modules.repository.RestaurantInteractors
-import com.ck.doordashproject.features.dashboard.modules.repository.RestaurantInteractorsImpl
+import com.ck.doordashproject.R
+import com.ck.doordashproject.base.network.RetrofitException
+import com.ck.doordashproject.features.dashboard.models.repository.RestaurantInteractors
+import com.ck.doordashproject.features.dashboard.models.repository.RestaurantInteractorsImpl
 import com.ck.doordashproject.features.dashboard.view.RestaurantListView
 import io.reactivex.disposables.CompositeDisposable
 
-class RestaurantListFragmentPresenterImpl: RestaurantListFragmentPresenter {
+class RestaurantListFragmentPresenterImpl : RestaurantListFragmentPresenter {
     companion object {
         private val TAG = RestaurantListFragmentPresenter::class.java.name
         @VisibleForTesting
@@ -16,14 +17,23 @@ class RestaurantListFragmentPresenterImpl: RestaurantListFragmentPresenter {
         @VisibleForTesting
         const val DOOR_DASH_LNG = -122.139956F
     }
+
     private val view: RestaurantListView
     private val compositeDisposable: CompositeDisposable
     private val interactor: RestaurantInteractors
 
-    constructor(view: RestaurantListView): this(view, CompositeDisposable(), RestaurantInteractorsImpl())
+    constructor(view: RestaurantListView) : this(
+        view,
+        CompositeDisposable(),
+        RestaurantInteractorsImpl()
+    )
 
     @VisibleForTesting
-    constructor(view: RestaurantListView, compositeDisposable: CompositeDisposable, interactor: RestaurantInteractors) {
+    constructor(
+        view: RestaurantListView,
+        compositeDisposable: CompositeDisposable,
+        interactor: RestaurantInteractors
+    ) {
         this.view = view
         this.compositeDisposable = compositeDisposable
         this.interactor = interactor
@@ -43,9 +53,16 @@ class RestaurantListFragmentPresenterImpl: RestaurantListFragmentPresenter {
 
     private fun subscribeGetRestaurants() {
         compositeDisposable.add(interactor
-                .getRestaurantNearBy(DOOR_DASH_LAT, DOOR_DASH_LNG)
-                .subscribe({
-                    view.getRestaurantListViewModel().get()?.setRestaurants(it)
-                }, { e -> Log.e(TAG, e.message, e)}))
+            .getRestaurantNearBy(DOOR_DASH_LAT, DOOR_DASH_LNG)
+            .subscribe({
+                view.getRestaurantListViewModel().get()?.setRestaurants(it)
+            }, { e ->
+                if (e is RetrofitException) {
+                    if (e.getKind() == RetrofitException.Kind.NETWORK) {
+                        view.getAppNotificationViewModel().get()?.setErrorNotification(R.string.network_error)
+                    }
+                }
+            })
+        )
     }
 }

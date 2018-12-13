@@ -1,4 +1,4 @@
-package com.ck.doordashproject.base.modules.data
+package com.ck.doordashproject.base.models.data.restaurants
 
 import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize

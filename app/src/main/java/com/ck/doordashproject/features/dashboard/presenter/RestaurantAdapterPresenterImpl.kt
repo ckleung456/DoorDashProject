@@ -3,7 +3,7 @@ package com.ck.doordashproject.features.dashboard.presenter
 import android.os.Bundle
 import androidx.annotation.VisibleForTesting
 import androidx.recyclerview.widget.DiffUtil
-import com.ck.doordashproject.base.modules.data.RestaurantDataModel
+import com.ck.doordashproject.base.models.data.restaurants.RestaurantDataModel
 import com.ck.doordashproject.features.dashboard.ui.viewholders.RestaurantViewHolder
 import com.ck.doordashproject.features.dashboard.utils.RestaurantsDiffCallback
 import com.ck.doordashproject.features.dashboard.view.RestaurantAdapterView

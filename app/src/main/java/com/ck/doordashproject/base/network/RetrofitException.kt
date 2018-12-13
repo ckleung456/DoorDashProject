@@ -49,6 +49,7 @@ class RetrofitException private constructor(message: String?, url: String, respo
     private val mResponse = response
     private val mGson = gson
     private val mSuccessType = successType
+    private val mKind = kind
 
     private var errorBody: Any? = null
 
@@ -68,5 +69,9 @@ class RetrofitException private constructor(message: String?, url: String, respo
             errorBody = mGson.fromJson<Any>(body.charStream(), mSuccessType)
         }
         return errorBody
+    }
+
+    fun getKind(): Kind {
+        return mKind
     }
 }
