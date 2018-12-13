@@ -41,7 +41,7 @@ abstract class BaseActivity : AppCompatActivity() {
             else
                 backStackEntry?.name!! //update current fragment tag back to previous tag
             mCurrentFragment = getSelectedFragment(tag)
-            supportFragmentManager.popBackStackImmediate(tag, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+            supportFragmentManager.popBackStackImmediate()
         }
     }
 
