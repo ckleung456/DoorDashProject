@@ -124,7 +124,7 @@ class RestaurantListFragmentPresenterImpl : RestaurantListFragmentPresenter {
 
     private fun loadMap() {
         val storedHashMapString = preferences.getString(MAP_KEY, "")
-        if (!storedHashMapString.isEmpty()) {
+        if (!storedHashMapString.isNullOrEmpty()) {
             val type = object : TypeToken<HashMap<String, String>>() {
 
             }.type
