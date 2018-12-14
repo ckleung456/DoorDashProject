@@ -73,6 +73,9 @@ class RestaurantListFragmentPresenterImpl : RestaurantListFragmentPresenter {
         compositeDisposable.clear()
     }
 
+    /**
+     *  restaurant list fragment ondestroy will only be called when this project is destroyed
+     */
     override fun onDestroy(owner: LifecycleOwner) {
         compositeDisposable.clear()
         saveMap()
