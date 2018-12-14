@@ -144,12 +144,12 @@ class RestaurantListFragmentPresenterImpl : RestaurantListFragmentPresenter {
     }
 
     private fun intToType(i : Int): LikedStatus {
-        val i =
+        val d =
             when(i){
                 1 -> LikedStatus.LIKED
                 0 -> LikedStatus.UN_LIKED
                 else -> LikedStatus.NO_PREF
             }
-        return i
+        return d
     }
 }
