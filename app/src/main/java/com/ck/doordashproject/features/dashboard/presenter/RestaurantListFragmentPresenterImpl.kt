@@ -125,7 +125,7 @@ class RestaurantListFragmentPresenterImpl : RestaurantListFragmentPresenter {
     private fun loadMap() {
         val storedHashMapString = preferences.getString(MAP_KEY, "")
         if (!storedHashMapString.isNullOrEmpty()) {
-            val type = object : TypeToken<HashMap<String, String>>() {
+            val type = object : TypeToken<HashMap<Long, Int>>() {
 
             }.type
             val tmpMap = gson.fromJson(storedHashMapString, type) as HashMap<Long, Int>
