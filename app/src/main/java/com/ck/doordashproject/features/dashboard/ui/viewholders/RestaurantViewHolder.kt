@@ -1,21 +1,31 @@
 package com.ck.doordashproject.features.dashboard.ui.viewholders
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
-import com.ck.doordashproject.base.models.data.restaurants.RestaurantDataModel
+import com.ck.doordashproject.R
+import com.ck.doordashproject.features.dashboard.data.RestaurantDataModelWrapper
 import com.ck.doordashproject.features.dashboard.presenter.RestaurantViewHolderPresenter
 import com.ck.doordashproject.features.dashboard.presenter.RestaurantViewHolderPresenterImpl
 import com.ck.doordashproject.features.dashboard.view.RestaurantViewHolderView
 import kotlinx.android.synthetic.main.adapter_restaurant.view.*
 
-class RestaurantViewHolder(itemView: View): RecyclerView.ViewHolder(itemView), RestaurantViewHolderView, View.OnClickListener {
+class RestaurantViewHolder(itemView: View): RecyclerView.ViewHolder(itemView), RestaurantViewHolderView {
     val mPresenter: RestaurantViewHolderPresenter
+    lateinit var context: Context
 
     init {
         mPresenter = RestaurantViewHolderPresenterImpl(this)
-        itemView.setOnClickListener(this)
+        context = itemView.context
+//        itemView.setOnClickListener(this)
+        itemView.img_option.setOnClickListener {
+            mPresenter.performLikeOption()
+        }
+        itemView.setOnClickListener {
+            mPresenter.showRestaurantDetail()
+        }
     }
 
     override fun setRestaurantName(name: String) {
@@ -38,11 +48,12 @@ class RestaurantViewHolder(itemView: View): RecyclerView.ViewHolder(itemView), R
         itemView.txt_restaurant_status.text = status
     }
 
-    override fun onClick(v: View?) {
-        mPresenter.showRestaurantDetail()
+    override fun setRestaurantLikedStatus(status: Int) {
+        val statusString = context.getString(status)
+        itemView.img_option.text = context.getString(R.string.like_option, statusString)
     }
 
-    fun onBind(restaurantDataModel: RestaurantDataModel) {
+    fun onBind(restaurantDataModel: RestaurantDataModelWrapper) {
         mPresenter.onBind(restaurantDataModel)
     }
 }

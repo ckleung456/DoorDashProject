@@ -1,5 +1,6 @@
 package com.ck.doordashproject.features.dashboard.ui.fragments
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -23,6 +24,7 @@ class RestaurantListFragment: Fragment(), RestaurantListView {
     companion object {
         val TAG = RestaurantListFragment::class.java.name
         private const val SOMETHING_WENT_WRONG = "Something went wrong on "
+        private const val DOORDASH_PREF = "DOORDASH_PREF"
 
         fun newInstance(): RestaurantListFragment {
             return RestaurantListFragment()
@@ -38,7 +40,8 @@ class RestaurantListFragment: Fragment(), RestaurantListView {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (mPresenter == null) {
-            mPresenter = RestaurantListFragmentPresenterImpl(this)
+            val preference = context!!.getSharedPreferences(DOORDASH_PREF, Context.MODE_PRIVATE)
+            mPresenter = RestaurantListFragmentPresenterImpl(this, preference)
         }
         lifecycle.addObserver(mPresenter!!)
     }

@@ -9,4 +9,5 @@ interface RestaurantViewHolderView {
     fun setRestaurantLogo(bitmap: Bitmap)
     fun setRestaurantLogo(drawable: Drawable)
     fun setRestaurantStatus(status: String)
+    fun setRestaurantLikedStatus(status: Int)
 }

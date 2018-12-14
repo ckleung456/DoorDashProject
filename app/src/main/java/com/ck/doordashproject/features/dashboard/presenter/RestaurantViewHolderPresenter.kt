@@ -1,8 +1,9 @@
 package com.ck.doordashproject.features.dashboard.presenter
 
-import com.ck.doordashproject.base.models.data.restaurants.RestaurantDataModel
+import com.ck.doordashproject.features.dashboard.data.RestaurantDataModelWrapper
 
 interface RestaurantViewHolderPresenter {
-    fun onBind(restaurantDataModel: RestaurantDataModel)
+    fun onBind(restaurantDataModel: RestaurantDataModelWrapper)
     fun showRestaurantDetail()
+    fun performLikeOption()
 }

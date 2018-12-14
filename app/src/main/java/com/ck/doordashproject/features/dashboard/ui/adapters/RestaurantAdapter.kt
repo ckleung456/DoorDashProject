@@ -6,9 +6,9 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.ck.doordashproject.R
-import com.ck.doordashproject.base.models.data.restaurants.RestaurantDataModel
-import com.ck.doordashproject.features.dashboard.presenter.RestaurantAdatperPresenter
+import com.ck.doordashproject.features.dashboard.data.RestaurantDataModelWrapper
 import com.ck.doordashproject.features.dashboard.presenter.RestaurantAdapterPresenterImpl
+import com.ck.doordashproject.features.dashboard.presenter.RestaurantAdatperPresenter
 import com.ck.doordashproject.features.dashboard.ui.viewholders.RestaurantViewHolder
 import com.ck.doordashproject.features.dashboard.view.RestaurantAdapterView
 
@@ -37,7 +37,7 @@ class RestaurantAdapter: RecyclerView.Adapter<RestaurantViewHolder>(), Restauran
         diffResult.dispatchUpdatesTo(this)
     }
 
-    fun setRestaurants(restaurantsList: ArrayList<RestaurantDataModel>) {
+    fun setRestaurants(restaurantsList: ArrayList<RestaurantDataModelWrapper>) {
         mPresenter.setRestaurants(restaurantsList)
     }
 }
