@@ -5,7 +5,7 @@ import com.ck.doordashproject.R
 import com.ck.doordashproject.base.models.data.restaurants.RestaurantDataModel
 import com.ck.doordashproject.base.models.viewmodels.appnotification.AppNotificationViewModel
 import com.ck.doordashproject.base.network.RetrofitException
-import com.ck.doordashproject.features.dashboard.models.repository.RestaurantInteractors
+import com.ck.doordashproject.features.dashboard.models.repository.network.RestaurantInteractors
 import com.ck.doordashproject.features.dashboard.models.viewmodel.RestaurantListViewModel
 import com.ck.doordashproject.features.dashboard.view.RestaurantListView
 import com.nhaarman.mockito_kotlin.verifyZeroInteractions

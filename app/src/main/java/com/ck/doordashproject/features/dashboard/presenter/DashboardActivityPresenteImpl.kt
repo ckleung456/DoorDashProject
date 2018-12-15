@@ -7,8 +7,8 @@ import com.ck.doordashproject.R
 import com.ck.doordashproject.base.models.viewmodels.appnotification.AppNotificationViewModel
 import com.ck.doordashproject.base.network.RetrofitException
 import com.ck.doordashproject.features.dashboard.models.actions.RestaurantActionEventModel
-import com.ck.doordashproject.features.dashboard.models.repository.RestaurantInteractors
-import com.ck.doordashproject.features.dashboard.models.repository.RestaurantInteractorsImpl
+import com.ck.doordashproject.features.dashboard.models.repository.network.RestaurantInteractors
+import com.ck.doordashproject.features.dashboard.models.repository.network.RestaurantInteractorsImpl
 import com.ck.doordashproject.features.dashboard.models.viewmodel.RestaurantDetailViewModel
 import com.ck.doordashproject.features.dashboard.view.DashboardActivityView
 import io.reactivex.disposables.CompositeDisposable

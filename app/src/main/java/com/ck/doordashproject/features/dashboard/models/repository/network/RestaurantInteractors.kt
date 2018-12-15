@@ -1,4 +1,4 @@
-package com.ck.doordashproject.features.dashboard.models.repository
+package com.ck.doordashproject.features.dashboard.models.repository.network
 
 import androidx.annotation.NonNull
 import com.ck.doordashproject.base.models.data.restaurants.RestaurantDataModel

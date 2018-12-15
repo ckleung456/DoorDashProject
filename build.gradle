@@ -18,6 +18,7 @@ buildscript {
     ext.powerMock = '1.7.3'
     ext.mockito_kotlin = '1.5.0'
     ext.kluent = '1.40'
+    ext.roomVersion = '1.1.1'
     repositories {
         google()
         jcenter()

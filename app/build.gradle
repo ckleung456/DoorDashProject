@@ -4,6 +4,8 @@ apply plugin: 'kotlin-android'
 
 apply plugin: 'kotlin-android-extensions'
 
+apply plugin: 'kotlin-kapt'
+
 android {
     compileSdkVersion 28
     buildToolsVersion '28.0.3'
@@ -54,6 +56,11 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-viewmodel:$android_liftcycle"
     implementation "androidx.constraintlayout:constraintlayout:$constraintLayout"
     implementation "com.google.android.material:material:$material_design"
+    // Room components
+    implementation "androidx.room:room-runtime:$android_liftcycle"
+    annotationProcessor "androidx.room:room-compiler:$android_liftcycle"
+    kapt "androidx.room:room-compiler:$android_liftcycle"
+    androidTestImplementation "androidx.room:room-testing:$android_liftcycle"
 
     implementation "com.squareup.picasso:picasso:$picasso"
     implementation "com.squareup.okhttp3:okhttp:$okhttp"

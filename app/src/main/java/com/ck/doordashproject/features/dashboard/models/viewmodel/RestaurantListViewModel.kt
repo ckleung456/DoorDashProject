@@ -12,6 +12,6 @@ class RestaurantListViewModel : ViewModel() {
     }
 
     fun setRestaurants(newList: ArrayList<RestaurantDataModelWrapper>) {
-        restaurantList.value = newList
+        restaurantList.postValue(newList)
     }
 }

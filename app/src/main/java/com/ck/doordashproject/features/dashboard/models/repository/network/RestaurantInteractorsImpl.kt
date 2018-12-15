@@ -1,4 +1,4 @@
-package com.ck.doordashproject.features.dashboard.models.repository
+package com.ck.doordashproject.features.dashboard.models.repository.network
 
 import androidx.annotation.VisibleForTesting
 import com.ck.doordashproject.base.models.data.restaurants.RestaurantDataModel
@@ -8,7 +8,8 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 
-class RestaurantInteractorsImpl : RestaurantInteractors {
+class RestaurantInteractorsImpl :
+    RestaurantInteractors {
     companion object {
         const val OFFSET = 0
         const val LIMIT = 50
@@ -24,12 +25,15 @@ class RestaurantInteractorsImpl : RestaurantInteractors {
     }
 
     override fun getRestaurantNearBy(lat: Float, lng: Float): Observable<ArrayList<RestaurantDataModel>> {
-        return mService.service.fetchRestaurantNearBy(lat, lng, OFFSET, LIMIT)
+        return mService.service.fetchRestaurantNearBy(lat, lng,
+            OFFSET,
+            LIMIT
+        )
                 .map { response ->
                     val list = ArrayList<RestaurantDataModel>()
                     list.addAll(response.body()!!)
                     list
-                }.subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
+                }.subscribeOn(Schedulers.newThread()).observeOn(Schedulers.newThread())
     }
 
     override fun getRestaurantDetail(restaurantId: Long): Observable<RestaurantDetailDataModel> {

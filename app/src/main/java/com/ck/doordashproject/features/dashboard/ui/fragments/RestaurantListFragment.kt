@@ -1,6 +1,5 @@
 package com.ck.doordashproject.features.dashboard.ui.fragments
 
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -12,6 +11,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ck.doordashproject.R
 import com.ck.doordashproject.base.models.viewmodels.appnotification.AppNotificationViewModel
+import com.ck.doordashproject.features.dashboard.models.repository.database.LikedDatabase
 import com.ck.doordashproject.features.dashboard.models.viewmodel.RestaurantListViewModel
 import com.ck.doordashproject.features.dashboard.presenter.RestaurantListFragmentPresenter
 import com.ck.doordashproject.features.dashboard.presenter.RestaurantListFragmentPresenterImpl
@@ -24,7 +24,6 @@ class RestaurantListFragment: Fragment(), RestaurantListView {
     companion object {
         val TAG = RestaurantListFragment::class.java.name
         private const val SOMETHING_WENT_WRONG = "Something went wrong on "
-        private const val DOORDASH_PREF = "DOORDASH_PREF"
 
         fun newInstance(): RestaurantListFragment {
             return RestaurantListFragment()
@@ -36,12 +35,13 @@ class RestaurantListFragment: Fragment(), RestaurantListView {
     private var mLinearLayoutManager: LinearLayoutManager? = null
     private lateinit var mViewModel: RestaurantListViewModel
     private lateinit var mAppNotificationViewModel: AppNotificationViewModel
+    private var mDb: LikedDatabase? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (mPresenter == null) {
-            val preference = context!!.getSharedPreferences(DOORDASH_PREF, Context.MODE_PRIVATE)
-            mPresenter = RestaurantListFragmentPresenterImpl(this, preference)
+            mDb = LikedDatabase.getInstance(context!!)
+            mPresenter = RestaurantListFragmentPresenterImpl(this, mDb!!)
         }
         lifecycle.addObserver(mPresenter!!)
     }
@@ -92,6 +92,7 @@ class RestaurantListFragment: Fragment(), RestaurantListView {
             lifecycle.removeObserver(mPresenter!!)
             mPresenter = null
         }
+        LikedDatabase.destroyInstance()
         mViewModel.observeRestaurantsList().removeObservers(this)
         mAppNotificationViewModel.observeErrorNotification().removeObservers(this)
     }

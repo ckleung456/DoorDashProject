@@ -23,9 +23,10 @@ class RestaurantViewHolderPresenterImpl : RestaurantViewHolderPresenter, Target 
     var likeStatus: LikedStatus = LikedStatus.NO_PREF
 
     constructor(view: RestaurantViewHolderView) : this(
-            view,
-            RestaurantActionEventModel.INSTANCE,
-            ImageUtils.INSTANCE)
+        view,
+        RestaurantActionEventModel.INSTANCE,
+        ImageUtils.INSTANCE
+    )
 
     @VisibleForTesting
     constructor(view: RestaurantViewHolderView, actionModel: RestaurantActionEventModel, imageUtils: ImageUtils) {
@@ -41,10 +42,10 @@ class RestaurantViewHolderPresenterImpl : RestaurantViewHolderPresenter, Target 
         mView.setRestaurantSubTitle(data.description)
         mView.setRestaurantStatus(data.status_type)
         mImageUtils.loadLogo(data.cover_img_url, this)
-        when {
-            mDataModel!!.likeStatus == LikedStatus.LIKED -> mView.setRestaurantLikedStatus(R.string.like_status_liked)
-            mDataModel!!.likeStatus == LikedStatus.UN_LIKED -> mView.setRestaurantLikedStatus(R.string.like_status_unliked)
-            mDataModel!!.likeStatus == LikedStatus.NO_PREF -> mView.setRestaurantLikedStatus(R.string.like_status_no_pref)
+        when (mDataModel!!.likeStatus) {
+            LikedStatus.LIKED -> mView.setRestaurantLikedStatus(R.string.like_status_liked)
+            LikedStatus.UN_LIKED -> mView.setRestaurantLikedStatus(R.string.like_status_unliked)
+            LikedStatus.NO_PREF -> mView.setRestaurantLikedStatus(R.string.like_status_no_pref)
         }
     }
 
@@ -78,10 +79,10 @@ class RestaurantViewHolderPresenterImpl : RestaurantViewHolderPresenter, Target 
         } else {
             likeStatus = LikedStatus.UN_LIKED
         }
-        when {
-            mDataModel!!.likeStatus == LikedStatus.LIKED -> mView.setRestaurantLikedStatus(R.string.like_status_liked)
-            mDataModel!!.likeStatus == LikedStatus.UN_LIKED -> mView.setRestaurantLikedStatus(R.string.like_status_unliked)
-            mDataModel!!.likeStatus == LikedStatus.NO_PREF -> mView.setRestaurantLikedStatus(R.string.like_status_no_pref)
+        when (likeStatus) {
+            LikedStatus.LIKED -> mView.setRestaurantLikedStatus(R.string.like_status_liked)
+            LikedStatus.UN_LIKED -> mView.setRestaurantLikedStatus(R.string.like_status_unliked)
+            LikedStatus.NO_PREF -> mView.setRestaurantLikedStatus(R.string.like_status_no_pref)
         }
         mDataModel!!.likeStatus = likeStatus
         mActionModel.likeOption(mDataModel!!)
