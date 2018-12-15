@@ -12,17 +12,18 @@ abstract class LikedDatabase : RoomDatabase() {
 
     companion object {
         private var INSTANCE: LikedDatabase? = null
+        private val LOCK = Unit
 
-        fun getInstance(context: Context): LikedDatabase? {
-            if (INSTANCE == null) {
-                synchronized(LikedDatabase::class) {
+        fun getInstance(context: Context): LikedDatabase {
+            synchronized(LOCK) {
+                if (INSTANCE == null) {
                     INSTANCE = Room.databaseBuilder(
                         context.applicationContext,
                         LikedDatabase::class.java, "liked.db"
                     ).build()
                 }
+                return INSTANCE!!
             }
-            return INSTANCE
         }
 
         fun destroyInstance() {

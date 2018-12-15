@@ -40,8 +40,9 @@ class RestaurantListFragment: Fragment(), RestaurantListView {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (mPresenter == null) {
-            mDb = LikedDatabase.getInstance(context!!)
-            mPresenter = RestaurantListFragmentPresenterImpl(this, mDb!!)
+            context?.let {
+                mPresenter = RestaurantListFragmentPresenterImpl(this, LikedDatabase.getInstance(it))
+            } ?: throw Exception(SOMETHING_WENT_WRONG)
         }
         lifecycle.addObserver(mPresenter!!)
     }
