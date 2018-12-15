@@ -24,9 +24,7 @@ class RestaurantListFragmentPresenterImpl : RestaurantListFragmentPresenter {
         @VisibleForTesting
         const val DOOR_DASH_LNG = -122.139956F
     }
-
-    private val map: HashMap<Long, Int> = HashMap()
-
+    
     private val view: RestaurantListView
     private val db: LikedDatabase
     private val compositeDisposable: CompositeDisposable
