@@ -5,9 +5,11 @@ import com.ck.doordashproject.R
 import com.ck.doordashproject.base.models.data.restaurants.RestaurantDataModel
 import com.ck.doordashproject.base.models.viewmodels.appnotification.AppNotificationViewModel
 import com.ck.doordashproject.base.network.RetrofitException
+import com.ck.doordashproject.features.dashboard.data.RestaurantDataModelWrapper
+import com.ck.doordashproject.features.dashboard.models.actions.RestaurantActionEventModel
+import com.ck.doordashproject.features.dashboard.models.repository.database.LikedDatabase
 import com.ck.doordashproject.features.dashboard.models.repository.network.RestaurantInteractors
-import com.ck.doordashproject.features.dashboard.models.viewmodel.RestaurantListViewModel
-import com.ck.doordashproject.features.dashboard.view.RestaurantListView
+import com.ck.doordashproject.features.dashboard.models.viewmodel.RestaurantViewModel
 import com.nhaarman.mockito_kotlin.verifyZeroInteractions
 import com.nhaarman.mockito_kotlin.whenever
 import io.reactivex.Observable
@@ -29,35 +31,36 @@ import java.lang.ref.WeakReference
 @PrepareForTest(
     CompositeDisposable::class,
     LifecycleOwner::class,
-    RestaurantListViewModel::class,
+    RestaurantViewModel::class,
     RetrofitException::class,
-    AppNotificationViewModel::class
+    AppNotificationViewModel::class,
+    LikedDatabase::class,
+    RestaurantActionEventModel::class
 )
 class RestaurantListFragmentPresenterTests {
     companion object {
         val FAKE_LIST = ArrayList<RestaurantDataModel>()
+        val FAKE_LIST_WRAP = ArrayList<RestaurantDataModelWrapper>()
     }
 
-    private val viewMock: RestaurantListView = mock()
     private val compositeDisposableMock: CompositeDisposable = mock()
     private val interactorMock: RestaurantInteractors = mock()
     private val lifecycleOwnerMock: LifecycleOwner = mock()
-    private val weakReferenceMock: WeakReference<RestaurantListViewModel> = mock()
-    private val weakReference2Mock: WeakReference<AppNotificationViewModel> = mock()
-    private lateinit var viewModelMock: RestaurantListViewModel
+    private lateinit var viewModelMock: RestaurantViewModel
     private lateinit var appNotificationViewModel: AppNotificationViewModel
     private lateinit var retrofitExceptionMock: RetrofitException
+    private lateinit var likedDatabaseMock: LikedDatabase
+    private lateinit var actionEventMock: RestaurantActionEventModel
 
     private var underTests: RestaurantListFragmentPresenter? = null
 
     @Before
     fun `setup tests`() {
-        viewModelMock = PowerMockito.mock(RestaurantListViewModel::class.java)
+        viewModelMock = PowerMockito.mock(RestaurantViewModel::class.java)
         appNotificationViewModel = PowerMockito.mock(AppNotificationViewModel::class.java)
         retrofitExceptionMock = PowerMockito.mock(RetrofitException::class.java)
-        whenever(weakReferenceMock.get()).thenReturn(null)
-        whenever(viewMock.getRestaurantListViewModel()).thenReturn(weakReferenceMock)
-        whenever(viewMock.getAppNotificationViewModel()).thenReturn(weakReference2Mock)
+        likedDatabaseMock = PowerMockito.mock(LikedDatabase::class.java)
+        actionEventMock = PowerMockito.mock(RestaurantActionEventModel::class.java)
         whenever(
             interactorMock.getRestaurantNearBy(
                 RestaurantListFragmentPresenterImpl.DOOR_DASH_LAT,
@@ -65,7 +68,7 @@ class RestaurantListFragmentPresenterTests {
             )
         )
             .thenReturn(Observable.just(FAKE_LIST))
-        underTests = RestaurantListFragmentPresenterImpl(viewMock, compositeDisposableMock, interactorMock)
+        underTests = RestaurantListFragmentPresenterImpl(viewModelMock, appNotificationViewModel, likedDatabaseMock, compositeDisposableMock, interactorMock, actionEventMock)
     }
 
     @After
@@ -77,10 +80,7 @@ class RestaurantListFragmentPresenterTests {
     fun `test on start`() {
         underTests!!.onStart(lifecycleOwnerMock)
         verify(compositeDisposableMock).add(any(Disposable::class))
-
-        whenever(weakReferenceMock.get()).thenReturn(viewModelMock)
-        underTests!!.onStart(lifecycleOwnerMock)
-        verify(viewModelMock)!!.setRestaurants(FAKE_LIST)
+        verify(viewModelMock)!!.setRestaurants(FAKE_LIST_WRAP)
     }
 
     @Test
@@ -93,16 +93,11 @@ class RestaurantListFragmentPresenterTests {
     fun `test refresh`() {
         underTests!!.refresh()
         verify(compositeDisposableMock).add(any(Disposable::class))
-
-        whenever(weakReferenceMock.get()).thenReturn(viewModelMock)
-        underTests!!.refresh()
-        verify(viewModelMock)!!.setRestaurants(FAKE_LIST)
+        verify(viewModelMock)!!.setRestaurants(FAKE_LIST_WRAP)
     }
 
     @Test
     fun `test no network when fetching list`() {
-        whenever(weakReferenceMock.get()).thenReturn(viewModelMock)
-        whenever(weakReference2Mock.get()).thenReturn(appNotificationViewModel)
         whenever(
             interactorMock.getRestaurantNearBy(
                 RestaurantListFragmentPresenterImpl.DOOR_DASH_LAT,

@@ -1,7 +1,5 @@
 package com.ck.doordashproject.features.dashboard.presenter
 
-import com.ck.doordashproject.base.models.data.restaurants.RestaurantDetailDataModel
+import androidx.lifecycle.DefaultLifecycleObserver
 
-interface RestaurantDetailFragmentPresenter {
-    fun setDetail(detailDataModel: RestaurantDetailDataModel)
-}
+interface RestaurantDetailFragmentPresenter: DefaultLifecycleObserver

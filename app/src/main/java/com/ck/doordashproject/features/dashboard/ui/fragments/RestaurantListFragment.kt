@@ -12,17 +12,15 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.ck.doordashproject.R
 import com.ck.doordashproject.base.models.viewmodels.appnotification.AppNotificationViewModel
 import com.ck.doordashproject.features.dashboard.models.repository.database.LikedDatabase
-import com.ck.doordashproject.features.dashboard.models.viewmodel.RestaurantListViewModel
+import com.ck.doordashproject.features.dashboard.models.viewmodel.RestaurantViewModel
 import com.ck.doordashproject.features.dashboard.presenter.RestaurantListFragmentPresenter
 import com.ck.doordashproject.features.dashboard.presenter.RestaurantListFragmentPresenterImpl
 import com.ck.doordashproject.features.dashboard.ui.adapters.RestaurantAdapter
-import com.ck.doordashproject.features.dashboard.view.RestaurantListView
 import kotlinx.android.synthetic.main.fragment_restaurants_list.*
-import java.lang.ref.WeakReference
 
-class RestaurantListFragment: Fragment(), RestaurantListView {
+class RestaurantListFragment: Fragment() {
     companion object {
-        val TAG = RestaurantListFragment::class.java.name
+        val TAG: String = RestaurantListFragment::class.java.name
         private const val SOMETHING_WENT_WRONG = "Something went wrong on "
 
         fun newInstance(): RestaurantListFragment {
@@ -33,23 +31,24 @@ class RestaurantListFragment: Fragment(), RestaurantListView {
     private var mAdapter: RestaurantAdapter? = null
     private var mPresenter: RestaurantListFragmentPresenter? = null
     private var mLinearLayoutManager: LinearLayoutManager? = null
-    private lateinit var mViewModel: RestaurantListViewModel
+    private lateinit var mViewModel: RestaurantViewModel
     private lateinit var mAppNotificationViewModel: AppNotificationViewModel
-    private var mDb: LikedDatabase? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        activity?.run {
+            mViewModel = ViewModelProviders.of(this).get(RestaurantViewModel::class.java)
+            mAppNotificationViewModel = ViewModelProviders.of(this).get(AppNotificationViewModel::class.java)
+        } ?: throw Exception(SOMETHING_WENT_WRONG.plus(TAG))
         if (mPresenter == null) {
             context?.let {
-                mPresenter = RestaurantListFragmentPresenterImpl(this, LikedDatabase.getInstance(it))
+                mPresenter = RestaurantListFragmentPresenterImpl(mViewModel, mAppNotificationViewModel, LikedDatabase.getInstance(it))
             } ?: throw Exception(SOMETHING_WENT_WRONG)
         }
         lifecycle.addObserver(mPresenter!!)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_restaurants_list, container, false)
-    }
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_restaurants_list, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -65,17 +64,12 @@ class RestaurantListFragment: Fragment(), RestaurantListView {
         val decoration = DividerItemDecoration(context, DividerItemDecoration.HORIZONTAL)
         list_restaurants.addItemDecoration(decoration)
         list_refresh.setOnRefreshListener{
-             -> mPresenter!!.refresh()
+            mPresenter!!.refresh()
         }
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        activity?.run {
-            mViewModel = ViewModelProviders.of(this).get(RestaurantListViewModel::class.java)
-            mAppNotificationViewModel = ViewModelProviders.of(this).get(AppNotificationViewModel::class.java)
-        } ?: throw Exception(SOMETHING_WENT_WRONG.plus(TAG))
-
+    override fun onStart() {
+        super.onStart()
         mViewModel.observeRestaurantsList().observe(this, Observer {
                 list ->
             mAdapter?.setRestaurants(list)
@@ -94,15 +88,5 @@ class RestaurantListFragment: Fragment(), RestaurantListView {
             mPresenter = null
         }
         LikedDatabase.destroyInstance()
-        mViewModel.observeRestaurantsList().removeObservers(this)
-        mAppNotificationViewModel.observeErrorNotification().removeObservers(this)
-    }
-
-    override fun getAppNotificationViewModel(): WeakReference<AppNotificationViewModel> {
-        return WeakReference(mAppNotificationViewModel)
-    }
-
-    override fun getRestaurantListViewModel(): WeakReference<RestaurantListViewModel> {
-        return WeakReference(mViewModel)
     }
 }

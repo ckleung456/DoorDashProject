@@ -8,8 +8,9 @@ import com.ck.doordashproject.base.models.viewmodels.appnotification.AppNotifica
 import com.ck.doordashproject.base.network.RetrofitException
 import com.ck.doordashproject.features.dashboard.models.actions.RestaurantActionEventModel
 import com.ck.doordashproject.features.dashboard.models.repository.network.RestaurantInteractors
-import com.ck.doordashproject.features.dashboard.models.viewmodel.RestaurantDetailViewModel
-import com.ck.doordashproject.features.dashboard.view.DashboardActivityView
+import com.ck.doordashproject.features.dashboard.models.viewmodel.RestaurantViewModel
+import com.ck.doordashproject.features.dashboard.ui.fragments.RestaurantDetailFragment
+import com.ck.doordashproject.features.dashboard.ui.fragments.RestaurantListFragment
 import com.nhaarman.mockito_kotlin.*
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
@@ -28,7 +29,7 @@ import org.powermock.modules.junit4.PowerMockRunner
     LifecycleOwner::class,
     RestaurantActionEventModel::class,
     RestaurantDetailDataModel::class,
-    RestaurantDetailViewModel::class,
+    RestaurantViewModel::class,
     AppNotificationViewModel::class,
     RetrofitException::class
 )
@@ -37,29 +38,25 @@ class DashboardActivityPresenterTests {
         private const val FAKE_ID = 1L
     }
 
-    private val viewMock: DashboardActivityView = mock()
-    private lateinit var detailViewModel: RestaurantDetailViewModel
+    private lateinit var viewModelMock: RestaurantViewModel
     private lateinit var appNotificationViewModel: AppNotificationViewModel
     private val compositeDisposableMock: CompositeDisposable = mock()
     private val interactorMock: RestaurantInteractors = mock()
     private lateinit var actionEventModelMock: RestaurantActionEventModel
     private val lifecycleOwnerMock: LifecycleOwner = mock()
     private val restaurantDetailDataModelMock: RestaurantDetailDataModel = mock()
-    private var mutableLiveDataMock: MutableLiveData<RestaurantDetailDataModel> = mock()
     private lateinit var retrofitExceptionMock: RetrofitException
 
     private var underTests: DashboardActivityPresenter? = null
 
     @Before
     fun `setup tests`() {
-        detailViewModel = PowerMockito.mock(RestaurantDetailViewModel::class.java)
+        viewModelMock = PowerMockito.mock(RestaurantViewModel::class.java)
         appNotificationViewModel = PowerMockito.mock(AppNotificationViewModel::class.java)
         actionEventModelMock = PowerMockito.mock(RestaurantActionEventModel::class.java)
         retrofitExceptionMock = PowerMockito.mock(RetrofitException::class.java)
-        whenever(detailViewModel.observeRestaurantDetail()).thenReturn(mutableLiveDataMock)
         underTests = DashboardActivityPresenteImpl(
-            viewMock,
-            detailViewModel,
+            viewModelMock,
             appNotificationViewModel,
             compositeDisposableMock,
             interactorMock,
@@ -77,12 +74,12 @@ class DashboardActivityPresenterTests {
         whenever(actionEventModelMock.observeShowRestaurantById()).thenReturn(Observable.just(FAKE_ID))
         whenever(interactorMock.getRestaurantDetail(FAKE_ID)).thenReturn(Observable.just(restaurantDetailDataModelMock))
         underTests!!.onCreate(lifecycleOwnerMock)
-        verify(viewMock).launchRestaurantsList()
+        verify(viewModelMock).setShowPage(RestaurantListFragment.TAG)
         verify(compositeDisposableMock, times(2)).add(any())
         verify(actionEventModelMock).observeShowRestaurantById()
         verify(interactorMock).getRestaurantDetail(FAKE_ID)
-        verify(viewMock).launchRestaurantDetail()
-        verify(detailViewModel).setRestaurantDetail(restaurantDetailDataModelMock)
+        verify(viewModelMock).setShowPage(RestaurantDetailFragment.TAG)
+        verify(actionEventModelMock).setPickedRestaurantDetail(restaurantDetailDataModelMock)
         verifyZeroInteractions(appNotificationViewModel)
 
         whenever(interactorMock.getRestaurantDetail(FAKE_ID)).thenReturn(Observable.error(retrofitExceptionMock))
@@ -100,12 +97,12 @@ class DashboardActivityPresenterTests {
 
         whenever(retrofitExceptionMock.getKind()).thenReturn(RetrofitException.Kind.NETWORK)
         underTests!!.onCreate(lifecycleOwnerMock)
-        verify(viewMock, times(5)).launchRestaurantsList()
+        verify(viewModelMock, times(5)).setShowPage(RestaurantListFragment.TAG)
         verify(compositeDisposableMock, times(10)).add(any())
         verify(actionEventModelMock, times(5)).observeShowRestaurantById()
         verify(interactorMock, times(5)).getRestaurantDetail(FAKE_ID)
-        verify(viewMock).launchRestaurantDetail()
-        verify(detailViewModel).setRestaurantDetail(restaurantDetailDataModelMock)
+        verify(viewModelMock).setShowPage(RestaurantDetailFragment.TAG)
+        verify(actionEventModelMock).setPickedRestaurantDetail(restaurantDetailDataModelMock)
         verify(appNotificationViewModel).setErrorNotification(R.string.network_error)
     }
 
@@ -113,6 +110,5 @@ class DashboardActivityPresenterTests {
     fun `test on destroy`() {
         underTests!!.onDestroy(lifecycleOwnerMock)
         verify(compositeDisposableMock).clear()
-        verify(mutableLiveDataMock).removeObservers(lifecycleOwnerMock)
     }
 }

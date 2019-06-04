@@ -9,8 +9,9 @@ import com.ck.doordashproject.base.network.RetrofitException
 import com.ck.doordashproject.features.dashboard.models.actions.RestaurantActionEventModel
 import com.ck.doordashproject.features.dashboard.models.repository.network.RestaurantInteractors
 import com.ck.doordashproject.features.dashboard.models.repository.network.RestaurantInteractorsImpl
-import com.ck.doordashproject.features.dashboard.models.viewmodel.RestaurantDetailViewModel
-import com.ck.doordashproject.features.dashboard.view.DashboardActivityView
+import com.ck.doordashproject.features.dashboard.models.viewmodel.RestaurantViewModel
+import com.ck.doordashproject.features.dashboard.ui.fragments.RestaurantDetailFragment
+import com.ck.doordashproject.features.dashboard.ui.fragments.RestaurantListFragment
 import io.reactivex.disposables.CompositeDisposable
 
 class DashboardActivityPresenteImpl : DashboardActivityPresenter {
@@ -18,20 +19,17 @@ class DashboardActivityPresenteImpl : DashboardActivityPresenter {
         private val TAG = DashboardActivityPresenter::class.java.name
     }
 
-    private val view: DashboardActivityView
-    private val detailViewModel: RestaurantDetailViewModel
+    private val viewModel: RestaurantViewModel
     private val appNotificationViewModel: AppNotificationViewModel
     private val compositeDisposable: CompositeDisposable
     private val interactor: RestaurantInteractors
     private val actionEventModel: RestaurantActionEventModel
 
     constructor(
-        view: DashboardActivityView,
-        detailViewModel: RestaurantDetailViewModel,
+        viewModel: RestaurantViewModel,
         appNotificationViewModel: AppNotificationViewModel
     ) : this(
-        view,
-        detailViewModel,
+        viewModel,
         appNotificationViewModel,
         CompositeDisposable(),
         RestaurantInteractorsImpl(),
@@ -40,15 +38,13 @@ class DashboardActivityPresenteImpl : DashboardActivityPresenter {
 
     @VisibleForTesting
     constructor(
-        view: DashboardActivityView,
-        detailViewModel: RestaurantDetailViewModel,
+        viewModel: RestaurantViewModel,
         appNotificationViewModel: AppNotificationViewModel,
         compositeDisposable: CompositeDisposable,
         interactor: RestaurantInteractors,
         actionEventModel: RestaurantActionEventModel
     ) {
-        this.view = view
-        this.detailViewModel = detailViewModel
+        this.viewModel = viewModel
         this.appNotificationViewModel = appNotificationViewModel
         this.compositeDisposable = compositeDisposable
         this.interactor = interactor
@@ -56,7 +52,7 @@ class DashboardActivityPresenteImpl : DashboardActivityPresenter {
     }
 
     override fun onCreate(owner: LifecycleOwner) {
-        view.launchRestaurantsList()
+        viewModel.setShowPage(RestaurantListFragment.TAG)
         compositeDisposable.add(
             actionEventModel
                 .observeShowRestaurantById()
@@ -68,7 +64,6 @@ class DashboardActivityPresenteImpl : DashboardActivityPresenter {
 
     override fun onDestroy(owner: LifecycleOwner) {
         compositeDisposable.clear()
-        detailViewModel.observeRestaurantDetail().removeObservers(owner)
     }
 
     private fun subscribeRestaurantDetail(restaurantId: Long) {
@@ -76,8 +71,8 @@ class DashboardActivityPresenteImpl : DashboardActivityPresenter {
             interactor
                 .getRestaurantDetail(restaurantId)
                 .subscribe({ dataModel ->
-                    view.launchRestaurantDetail()
-                    detailViewModel.setRestaurantDetail(dataModel)
+                    viewModel.setShowPage(RestaurantDetailFragment.TAG)
+                    actionEventModel.setPickedRestaurantDetail(dataModel)
                 }, { e ->
                     if (e is RetrofitException) {
                         if (e.getKind() == RetrofitException.Kind.NETWORK) {

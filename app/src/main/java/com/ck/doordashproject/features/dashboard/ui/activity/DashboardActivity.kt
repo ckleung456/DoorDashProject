@@ -2,18 +2,17 @@ package com.ck.doordashproject.features.dashboard.ui.activity
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.ck.doordashproject.R
 import com.ck.doordashproject.base.ui.BaseActivity
-import com.ck.doordashproject.features.dashboard.models.viewmodel.RestaurantDetailViewModel
+import com.ck.doordashproject.features.dashboard.models.viewmodel.RestaurantViewModel
 import com.ck.doordashproject.features.dashboard.presenter.DashboardActivityPresenteImpl
 import com.ck.doordashproject.features.dashboard.presenter.DashboardActivityPresenter
 import com.ck.doordashproject.features.dashboard.ui.fragments.RestaurantDetailFragment
 import com.ck.doordashproject.features.dashboard.ui.fragments.RestaurantListFragment
-import com.ck.doordashproject.features.dashboard.view.DashboardActivityView
-import kotlinx.android.synthetic.main.toolbar.*
 
-class DashboardActivity : BaseActivity(), DashboardActivityView {
+class DashboardActivity : BaseActivity() {
     private var restaurantListFragment: RestaurantListFragment? = null
     private var restaurantDetailFragment: RestaurantDetailFragment? = null
     private var mPresenter: DashboardActivityPresenter? = null
@@ -21,9 +20,19 @@ class DashboardActivity : BaseActivity(), DashboardActivityView {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        val viewModel: RestaurantViewModel = ViewModelProviders.of(this).get(RestaurantViewModel::class.java)
+        viewModel.apply {
+            viewModel.observeShowPage().observe(this@DashboardActivity, Observer {
+                when(it) {
+                    RestaurantListFragment.TAG -> launchRestaurantsList()
+                    RestaurantDetailFragment.TAG -> launchRestaurantDetail()
+                    else -> {
+                    }
+                }
+            })
+        }
         mPresenter = DashboardActivityPresenteImpl(
-            this,
-            ViewModelProviders.of(this).get(RestaurantDetailViewModel::class.java),
+            viewModel,
             appNotificationViewModel
 
         )
@@ -55,18 +64,14 @@ class DashboardActivity : BaseActivity(), DashboardActivityView {
         return RestaurantListFragment.TAG
     }
 
-    override fun setTitle(title: String) {
-        txt_title.text = title
-    }
-
-    override fun launchRestaurantsList() {
+    private fun launchRestaurantsList() {
         if (restaurantListFragment == null) {
             restaurantListFragment = RestaurantListFragment.newInstance()
         }
         switchFragment(restaurantListFragment!!, RestaurantListFragment.TAG)
     }
 
-    override fun launchRestaurantDetail() {
+    private fun launchRestaurantDetail() {
         if (restaurantDetailFragment == null) {
             restaurantDetailFragment = RestaurantDetailFragment.newInstance()
         }

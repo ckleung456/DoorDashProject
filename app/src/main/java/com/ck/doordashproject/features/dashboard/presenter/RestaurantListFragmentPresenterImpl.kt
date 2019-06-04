@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LifecycleOwner
 import com.ck.doordashproject.R
+import com.ck.doordashproject.base.models.viewmodels.appnotification.AppNotificationViewModel
 import com.ck.doordashproject.base.network.RetrofitException
 import com.ck.doordashproject.features.dashboard.data.LikedStatus
 import com.ck.doordashproject.features.dashboard.data.RestaurantDataModelWrapper
@@ -12,7 +13,7 @@ import com.ck.doordashproject.features.dashboard.models.repository.database.Like
 import com.ck.doordashproject.features.dashboard.models.repository.database.entity.LikedDb
 import com.ck.doordashproject.features.dashboard.models.repository.network.RestaurantInteractors
 import com.ck.doordashproject.features.dashboard.models.repository.network.RestaurantInteractorsImpl
-import com.ck.doordashproject.features.dashboard.view.RestaurantListView
+import com.ck.doordashproject.features.dashboard.models.viewmodel.RestaurantViewModel
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 
@@ -25,14 +26,16 @@ class RestaurantListFragmentPresenterImpl : RestaurantListFragmentPresenter {
         const val DOOR_DASH_LNG = -122.139956F
     }
     
-    private val view: RestaurantListView
     private val db: LikedDatabase
     private val compositeDisposable: CompositeDisposable
     private val interactor: RestaurantInteractors
     private val actionEventModel: RestaurantActionEventModel
+    private val viewModel: RestaurantViewModel
+    private val appNotificationViewModel: AppNotificationViewModel
 
-    constructor(view: RestaurantListView, db: LikedDatabase) : this(
-        view,
+    constructor(viewModel: RestaurantViewModel, appNotificationViewModel: AppNotificationViewModel, db: LikedDatabase) : this(
+        viewModel,
+        appNotificationViewModel,
         db,
         CompositeDisposable(),
         RestaurantInteractorsImpl(),
@@ -41,13 +44,15 @@ class RestaurantListFragmentPresenterImpl : RestaurantListFragmentPresenter {
 
     @VisibleForTesting
     constructor(
-        view: RestaurantListView,
+        viewModel: RestaurantViewModel,
+        appNotificationViewModel: AppNotificationViewModel,
         db: LikedDatabase,
         compositeDisposable: CompositeDisposable,
         interactor: RestaurantInteractors,
         actionEventModel: RestaurantActionEventModel
     ) {
-        this.view = view
+        this.viewModel = viewModel
+        this.appNotificationViewModel = appNotificationViewModel
         this.db = db
         this.compositeDisposable = compositeDisposable
         this.interactor = interactor
@@ -92,11 +97,11 @@ class RestaurantListFragmentPresenterImpl : RestaurantListFragmentPresenter {
                         }
                         tmp.add(wrapper)
                     }
-                    view.getRestaurantListViewModel().get()?.setRestaurants(tmp)
+                    viewModel.setRestaurants(tmp)
                 }, { e ->
                     if (e is RetrofitException) {
                         if (e.getKind() == RetrofitException.Kind.NETWORK) {
-                            view.getAppNotificationViewModel().get()?.setErrorNotification(R.string.network_error)
+                            appNotificationViewModel.setErrorNotification(R.string.network_error)
                         }
                     }
                 })
