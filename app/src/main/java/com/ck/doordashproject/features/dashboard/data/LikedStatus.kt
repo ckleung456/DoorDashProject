@@ -1,5 +1,9 @@
 package com.ck.doordashproject.features.dashboard.data
 
-enum class LikedStatus {
+import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
+
+@Parcelize
+enum class LikedStatus: Parcelable {
     LIKED, UN_LIKED, NO_PREF
 }

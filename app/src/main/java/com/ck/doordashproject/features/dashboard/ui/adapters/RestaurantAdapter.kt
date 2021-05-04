@@ -1,43 +1,55 @@
 package com.ck.doordashproject.features.dashboard.ui.adapters
 
-import android.content.Context
+import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.ck.doordashproject.R
+import com.ck.doordashproject.databinding.AdapterRestaurantBinding
 import com.ck.doordashproject.features.dashboard.data.RestaurantDataModelWrapper
-import com.ck.doordashproject.features.dashboard.presenter.RestaurantAdapterPresenterImpl
-import com.ck.doordashproject.features.dashboard.presenter.RestaurantAdatperPresenter
 import com.ck.doordashproject.features.dashboard.ui.viewholders.RestaurantViewHolder
-import com.ck.doordashproject.features.dashboard.view.RestaurantAdapterView
+import com.ck.doordashproject.features.dashboard.utils.RestaurantsDiffCallback
 
-class RestaurantAdapter: RecyclerView.Adapter<RestaurantViewHolder>(), RestaurantAdapterView {
-    private var mPresenter: RestaurantAdatperPresenter = RestaurantAdapterPresenterImpl(this)
-    private var mContext: Context? = null
+class RestaurantAdapter(
+    private val showRestaurantDetail: (Long) -> Unit,
+    private val setRestaurantLikeStatus: (RestaurantDataModelWrapper) -> Unit
+) : RecyclerView.Adapter<RestaurantViewHolder>() {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RestaurantViewHolder {
-        mContext = parent.context
-        return RestaurantViewHolder(LayoutInflater.from(mContext).inflate(R.layout.adapter_restaurant, parent, false))
-    }
+    var items = listOf<RestaurantDataModelWrapper>()
+        set(value) {
+            val diffResult = DiffUtil.calculateDiff(RestaurantsDiffCallback(field, value))
+            field = value
+            diffResult.dispatchUpdatesTo(this)
+        }
 
-    override fun getItemCount(): Int {
-        return mPresenter.getItemCount()
-    }
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RestaurantViewHolder =
+        RestaurantViewHolder(
+            binding = AdapterRestaurantBinding.bind(
+                LayoutInflater.from(parent.context)
+                    .inflate(R.layout.adapter_restaurant, parent, false)
+            ),
+            showRestaurantDetail = showRestaurantDetail,
+            setRestaurantLikeStatus = setRestaurantLikeStatus
+        )
+
+    override fun getItemCount() = items.size
 
     override fun onBindViewHolder(holder: RestaurantViewHolder, position: Int) {
-        mPresenter.bindDataToHolder(holder, position, ArrayList())
+        onBindViewHolder(holder, position, mutableListOf())
     }
 
-    override fun onBindViewHolder(holder: RestaurantViewHolder, position: Int, payloads: MutableList<Any>) {
-        mPresenter.bindDataToHolder(holder, position, payloads)
-    }
-
-    override fun updateContents(diffResult: DiffUtil.DiffResult) {
-        diffResult.dispatchUpdatesTo(this)
-    }
-
-    fun setRestaurants(restaurantsList: ArrayList<RestaurantDataModelWrapper>) {
-        mPresenter.setRestaurants(restaurantsList)
+    override fun onBindViewHolder(
+        holder: RestaurantViewHolder,
+        position: Int,
+        payloads: MutableList<Any>
+    ) {
+        if (payloads.isEmpty()) {
+            items[position]
+        } else {
+            (payloads[payloads.size - 1] as Bundle).getParcelable(RestaurantsDiffCallback.EXTRA_DIFF_DATA)
+        }?.let {
+            holder.onBind(it)
+        }
     }
 }

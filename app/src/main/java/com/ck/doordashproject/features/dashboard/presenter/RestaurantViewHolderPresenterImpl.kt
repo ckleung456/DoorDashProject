@@ -7,84 +7,83 @@ import com.ck.doordashproject.R
 import com.ck.doordashproject.base.utils.ImageUtils
 import com.ck.doordashproject.features.dashboard.data.LikedStatus
 import com.ck.doordashproject.features.dashboard.data.RestaurantDataModelWrapper
-import com.ck.doordashproject.features.dashboard.models.actions.RestaurantActionEventModel
 import com.ck.doordashproject.features.dashboard.view.RestaurantViewHolderView
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
 
-class RestaurantViewHolderPresenterImpl : RestaurantViewHolderPresenter, Target {
-    private val mView: RestaurantViewHolderView
-    private val mActionModel: RestaurantActionEventModel
-    private val mImageUtils: ImageUtils
+class RestaurantViewHolderPresenterImpl constructor(
+    private val view: RestaurantViewHolderView,
+    private val imageUtils: ImageUtils = ImageUtils(),
+    private val showRestaurantDetail: (Long) -> Unit,
+    private val setRestaurantLikeStatus: (RestaurantDataModelWrapper) -> Unit
+) : RestaurantViewHolderPresenter, Target {
 
     @VisibleForTesting
-    var mDataModel: RestaurantDataModelWrapper? = null
+    var dataModel: RestaurantDataModelWrapper? = null
 
     var likeStatus: LikedStatus = LikedStatus.NO_PREF
 
-    constructor(view: RestaurantViewHolderView) : this(
-        view,
-        RestaurantActionEventModel.INSTANCE,
-        ImageUtils.INSTANCE
-    )
-
-    @VisibleForTesting
-    constructor(view: RestaurantViewHolderView, actionModel: RestaurantActionEventModel, imageUtils: ImageUtils) {
-        mView = view
-        mActionModel = actionModel
-        mImageUtils = imageUtils
-    }
-
     override fun onBind(restaurantDataModel: RestaurantDataModelWrapper) {
-        mDataModel = restaurantDataModel
-        val data = mDataModel!!.restaurantData
-        mView.setRestaurantName(data.name)
-        mView.setRestaurantSubTitle(data.description)
-        mView.setRestaurantStatus(data.status_type)
-        mImageUtils.loadLogo(data.cover_img_url, this)
-        when (mDataModel!!.likeStatus) {
-            LikedStatus.LIKED -> mView.setRestaurantLikedStatus(R.string.like_status_liked)
-            LikedStatus.UN_LIKED -> mView.setRestaurantLikedStatus(R.string.like_status_unliked)
-            LikedStatus.NO_PREF -> mView.setRestaurantLikedStatus(R.string.like_status_no_pref)
+        dataModel = restaurantDataModel
+        dataModel?.restaurantData?.let { data ->
+            data.name?.let {
+                view.setRestaurantName(it)
+            }
+            data.description?.let {
+                view.setRestaurantSubTitle(it)
+            }
+            data.status_type?.let {
+                view.setRestaurantStatus(it)
+            }
+            data.cover_img_url?.let {
+                imageUtils.loadLogo(it, this)
+            }
+        }
+        when (dataModel?.likeStatus) {
+            LikedStatus.LIKED -> view.setRestaurantLikedStatus(R.string.like_status_liked)
+            LikedStatus.UN_LIKED -> view.setRestaurantLikedStatus(R.string.like_status_unliked)
+            LikedStatus.NO_PREF -> view.setRestaurantLikedStatus(R.string.like_status_no_pref)
         }
     }
 
     override fun onPrepareLoad(placeHolderDrawable: Drawable?) {
-        if (placeHolderDrawable != null) {
-            mView.setRestaurantLogo(placeHolderDrawable)
+        placeHolderDrawable?.let {
+            view.setRestaurantLogo(it)
         }
     }
 
     override fun onBitmapFailed(e: Exception?, errorDrawable: Drawable?) {
-        if (errorDrawable != null) {
-            mView.setRestaurantLogo(errorDrawable)
+        errorDrawable?.let {
+            view.setRestaurantLogo(it)
         }
     }
 
     override fun onBitmapLoaded(bitmap: Bitmap?, from: Picasso.LoadedFrom?) {
-        if (bitmap != null) {
-            mView.setRestaurantLogo(bitmap)
+        bitmap?.let {
+            view.setRestaurantLogo(it)
         }
     }
 
     override fun showRestaurantDetail() {
-        if (mDataModel != null) {
-            mActionModel.showRestaurantDetailById(mDataModel!!.restaurantData.id)
+        dataModel?.restaurantData?.id?.let {
+            showRestaurantDetail.invoke(it)
         }
     }
 
     override fun performLikeOption() {
-        if (likeStatus == LikedStatus.NO_PREF || likeStatus == LikedStatus.UN_LIKED) {
-            likeStatus = LikedStatus.LIKED
+        likeStatus = if (likeStatus == LikedStatus.NO_PREF || likeStatus == LikedStatus.UN_LIKED) {
+            LikedStatus.LIKED
         } else {
-            likeStatus = LikedStatus.UN_LIKED
+            LikedStatus.UN_LIKED
         }
         when (likeStatus) {
-            LikedStatus.LIKED -> mView.setRestaurantLikedStatus(R.string.like_status_liked)
-            LikedStatus.UN_LIKED -> mView.setRestaurantLikedStatus(R.string.like_status_unliked)
-            LikedStatus.NO_PREF -> mView.setRestaurantLikedStatus(R.string.like_status_no_pref)
+            LikedStatus.LIKED -> view.setRestaurantLikedStatus(R.string.like_status_liked)
+            LikedStatus.UN_LIKED -> view.setRestaurantLikedStatus(R.string.like_status_unliked)
+            LikedStatus.NO_PREF -> view.setRestaurantLikedStatus(R.string.like_status_no_pref)
         }
-        mDataModel!!.likeStatus = likeStatus
-        mActionModel.likeOption(mDataModel!!)
+        dataModel?.let {
+            it.likeStatus = likeStatus
+            setRestaurantLikeStatus.invoke(it)
+        }
     }
 }

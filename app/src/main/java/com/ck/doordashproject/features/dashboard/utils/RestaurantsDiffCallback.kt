@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.recyclerview.widget.DiffUtil
 import com.ck.doordashproject.features.dashboard.data.RestaurantDataModelWrapper
 
-class RestaurantsDiffCallback(val oldList: ArrayList<RestaurantDataModelWrapper>, val newList: ArrayList<RestaurantDataModelWrapper>): DiffUtil.Callback(){
+class RestaurantsDiffCallback(val oldList: List<RestaurantDataModelWrapper>, val newList: List<RestaurantDataModelWrapper>): DiffUtil.Callback(){
     companion object {
         const val EXTRA_DIFF_DATA = "com.ck.doordashproject.features.dashboard.utils.RestaurantsDiffCallback.EXTRA_DIFF_DATA"
     }
@@ -24,7 +24,7 @@ class RestaurantsDiffCallback(val oldList: ArrayList<RestaurantDataModelWrapper>
     override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
         val oldItem = oldList[oldItemPosition]
         val newItem = newList[newItemPosition]
-        return oldItem.equals(newItem)
+        return oldItem == newItem
     }
 
     override fun getChangePayload(oldItemPosition: Int, newItemPosition: Int): Bundle? {

@@ -4,6 +4,15 @@ import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
-data class RestaurantDetailDataModel (val id: Long, val phone_number: String, val delivery_fee: Long, val average_rating: Double,
-                                      val status_type: String, val status: String, val yelp_rating: Double, val cover_img_url: String,
-                                      val name: String, val description: String) : Parcelable
+data class RestaurantDetailDataModel(
+    val id: Long = Long.MIN_VALUE,
+    val phone_number: String? = null,
+    val delivery_fee: Long? = Long.MIN_VALUE,
+    val average_rating: Double? = Double.MIN_VALUE,
+    val status_type: String? = null,
+    val status: String? = null,
+    val yelp_rating: Double? = Double.MIN_VALUE,
+    val cover_img_url: String? = null,
+    val name: String? = null,
+    val description: String? = null
+) : Parcelable

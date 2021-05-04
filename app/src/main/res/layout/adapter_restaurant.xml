@@ -32,7 +32,7 @@
                 android:autoSizeMaxTextSize="@dimen/txt_size_sixteen"
                 android:autoSizeMinTextSize="@dimen/txt_size_twelve"
                 android:autoSizeTextType="uniform"
-                android:lines="1"
+                android:maxLines="2"
                 android:textColor="@color/colorPrimaryDark"
                 android:layout_marginEnd="@dimen/margin_twelve"
                 android:text="@string/like_option"/>

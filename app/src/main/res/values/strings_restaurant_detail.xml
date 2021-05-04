@@ -4,7 +4,7 @@
     <string name="delivery_fee">Delivery Fee: &#36;%1$s</string>
     <string name="average_rating">Average rating: %1$s</string>
     <string name="yelp_rating">Yelp rating: %1$s</string>
-    <string name="like_option">Option: %1$s</string>
+    <string name="like_option">Option:\n%1$s</string>
     <string name="like_status_liked">Liked</string>
     <string name="like_status_unliked">Un-liked</string>
     <string name="like_status_no_pref">No preference</string>

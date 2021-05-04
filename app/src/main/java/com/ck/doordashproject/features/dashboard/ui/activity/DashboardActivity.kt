@@ -1,80 +1,56 @@
 package com.ck.doordashproject.features.dashboard.ui.activity
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.activity.viewModels
 import com.ck.doordashproject.R
 import com.ck.doordashproject.base.ui.BaseActivity
-import com.ck.doordashproject.features.dashboard.models.viewmodel.RestaurantViewModel
-import com.ck.doordashproject.features.dashboard.presenter.DashboardActivityPresenteImpl
-import com.ck.doordashproject.features.dashboard.presenter.DashboardActivityPresenter
+import com.ck.doordashproject.base.utils.observeEvent
 import com.ck.doordashproject.features.dashboard.ui.fragments.RestaurantDetailFragment
 import com.ck.doordashproject.features.dashboard.ui.fragments.RestaurantListFragment
+import com.ck.doordashproject.features.dashboard.viewmodel.RestaurantViewModel
+import com.ck.doordashproject.features.dashboard.viewmodel.State
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class DashboardActivity : BaseActivity() {
-    private var restaurantListFragment: RestaurantListFragment? = null
-    private var restaurantDetailFragment: RestaurantDetailFragment? = null
-    private var mPresenter: DashboardActivityPresenter? = null
+    companion object {
+        const val EXTRA_RESTAURANTS_LIST = "Doordash.Dashboard.EXTRA_RESTAURANTS_LIST"
+        const val EXTRA_RESTAURANT_DETAIL = "Doordash.Dashboard.EXTRA_RESTAURANT_DETAIL"
+    }
+
+    private val viewModel: RestaurantViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        val viewModel: RestaurantViewModel = ViewModelProviders.of(this).get(RestaurantViewModel::class.java)
-        viewModel.apply {
-            viewModel.observeShowPage().observe(this@DashboardActivity, Observer {
-                when(it) {
-                    RestaurantListFragment.TAG -> launchRestaurantsList()
-                    RestaurantDetailFragment.TAG -> launchRestaurantDetail()
-                    else -> {
-                    }
-                }
-            })
+        viewModel.setState(State.List)
+        viewModel.dashboardStateMachine.observeEvent(lifecycleOwner = this) { state ->
+            when(state) {
+                is State.List -> launchRestaurantsList()
+                is State.Detail -> launchRestaurantDetail(restaurantId = state.restaurantId)
+            }
         }
-        mPresenter = DashboardActivityPresenteImpl(
-            viewModel,
-            appNotificationViewModel
-
-        )
-        lifecycle.addObserver(mPresenter!!)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        if (mPresenter != null) {
-            lifecycle.removeObserver(mPresenter!!)
-            mPresenter = null
-        }
-        restaurantListFragment = null
-        restaurantDetailFragment = null
-    }
-
-    override fun getContainerId(): Int {
-        return R.id.lContainer
-    }
-
-    override fun getSelectedFragment(toTag: String): Fragment {
-        if (toTag == RestaurantDetailFragment.TAG) {
-            return restaurantDetailFragment!!
-        }
-        return restaurantListFragment!!
-    }
-
-    override fun getEntryFragmentTag(): String {
-        return RestaurantListFragment.TAG
     }
 
     private fun launchRestaurantsList() {
-        if (restaurantListFragment == null) {
-            restaurantListFragment = RestaurantListFragment.newInstance()
+        RestaurantListFragment.newInstance().also {
+            supportFragmentManager.beginTransaction().add(
+                R.id.lContainer,
+                it,
+                RestaurantListFragment.TAG
+            ).commit()
         }
-        switchFragment(restaurantListFragment!!, RestaurantListFragment.TAG)
     }
 
-    private fun launchRestaurantDetail() {
-        if (restaurantDetailFragment == null) {
-            restaurantDetailFragment = RestaurantDetailFragment.newInstance()
+    private fun launchRestaurantDetail(restaurantId: Long) {
+        RestaurantDetailFragment.newInstance(restaurantId = restaurantId).also {
+            val transaction = supportFragmentManager.beginTransaction().add(
+                R.id.lContainer,
+                it,
+                RestaurantDetailFragment.TAG
+            )
+            transaction.addToBackStack(RestaurantDetailFragment.TAG)
+            transaction.commit()
         }
-        switchFragment(restaurantDetailFragment!!, RestaurantDetailFragment.TAG)
     }
 }

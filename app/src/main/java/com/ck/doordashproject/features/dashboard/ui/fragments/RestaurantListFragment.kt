@@ -5,88 +5,97 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.ck.doordashproject.R
-import com.ck.doordashproject.base.models.viewmodels.appnotification.AppNotificationViewModel
-import com.ck.doordashproject.features.dashboard.models.repository.database.LikedDatabase
-import com.ck.doordashproject.features.dashboard.models.viewmodel.RestaurantViewModel
-import com.ck.doordashproject.features.dashboard.presenter.RestaurantListFragmentPresenter
-import com.ck.doordashproject.features.dashboard.presenter.RestaurantListFragmentPresenterImpl
+import com.ck.doordashproject.base.models.AppBaseViewModel
+import com.ck.doordashproject.base.utils.observe
+import com.ck.doordashproject.databinding.FragmentRestaurantsListBinding
 import com.ck.doordashproject.features.dashboard.ui.adapters.RestaurantAdapter
-import kotlinx.android.synthetic.main.fragment_restaurants_list.*
+import com.ck.doordashproject.features.dashboard.viewmodel.RestaurantListViewModel
+import com.ck.doordashproject.features.dashboard.viewmodel.RestaurantViewModel
+import com.ck.doordashproject.features.dashboard.viewmodel.State
+import dagger.hilt.android.AndroidEntryPoint
 
-class RestaurantListFragment: Fragment() {
+@AndroidEntryPoint
+class RestaurantListFragment : Fragment() {
     companion object {
         val TAG: String = RestaurantListFragment::class.java.name
-        private const val SOMETHING_WENT_WRONG = "Something went wrong on "
 
-        fun newInstance(): RestaurantListFragment {
-            return RestaurantListFragment()
-        }
+        fun newInstance() = RestaurantListFragment()
     }
 
-    private var mAdapter: RestaurantAdapter? = null
-    private var mPresenter: RestaurantListFragmentPresenter? = null
-    private var mLinearLayoutManager: LinearLayoutManager? = null
-    private lateinit var mViewModel: RestaurantViewModel
-    private lateinit var mAppNotificationViewModel: AppNotificationViewModel
+    private var binding: FragmentRestaurantsListBinding? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        activity?.run {
-            mViewModel = ViewModelProviders.of(this).get(RestaurantViewModel::class.java)
-            mAppNotificationViewModel = ViewModelProviders.of(this).get(AppNotificationViewModel::class.java)
-        } ?: throw Exception(SOMETHING_WENT_WRONG.plus(TAG))
-        if (mPresenter == null) {
-            context?.let {
-                mPresenter = RestaurantListFragmentPresenterImpl(mViewModel, mAppNotificationViewModel, LikedDatabase.getInstance(it))
-            } ?: throw Exception(SOMETHING_WENT_WRONG)
-        }
-        lifecycle.addObserver(mPresenter!!)
+    private val viewModel: RestaurantViewModel by activityViewModels()
+
+    private val restaurantListViewModel: RestaurantListViewModel by viewModels()
+
+    private val appBaseViewModel: AppBaseViewModel by activityViewModels()
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        binding = FragmentRestaurantsListBinding.inflate(inflater, container, false)
+        return binding?.root
     }
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_restaurants_list, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        if (mLinearLayoutManager == null) {
-            mLinearLayoutManager = LinearLayoutManager(context)
-            list_restaurants.layoutManager = mLinearLayoutManager
-        }
-        if (mAdapter == null) {
-            mAdapter = RestaurantAdapter()
-        }
-        list_restaurants.adapter = mAdapter
-        list_restaurants.setHasFixedSize(true)
-        val decoration = DividerItemDecoration(context, DividerItemDecoration.HORIZONTAL)
-        list_restaurants.addItemDecoration(decoration)
-        list_refresh.setOnRefreshListener{
-            mPresenter!!.refresh()
+        binding?.apply {
+            listRestaurants.layoutManager = LinearLayoutManager(requireContext())
+            val adapter = RestaurantAdapter(
+                showRestaurantDetail = this@RestaurantListFragment::showRestaurantDetail,
+                setRestaurantLikeStatus = restaurantListViewModel::setRestaurantLikeStatus
+            )
+            listRestaurants.adapter = adapter
+            listRestaurants.setHasFixedSize(true)
+            listRestaurants.addItemDecoration(
+                DividerItemDecoration(context, DividerItemDecoration.HORIZONTAL)
+            )
+
+            listRefresh.setOnRefreshListener {
+                fetchRestaurantNearBy()
+            }
+
+            restaurantListViewModel.restaurantList.observe(lifecycleOwner = viewLifecycleOwner) {
+                adapter.items = it
+                listRefresh.isRefreshing = false
+            }
+
+            appBaseViewModel.appNotificationLiveData.observe(lifecycleOwner = viewLifecycleOwner) {
+                listRefresh.isRefreshing = false
+            }
         }
     }
 
     override fun onStart() {
         super.onStart()
-        mViewModel.observeRestaurantsList().observe(this, Observer {
-                list ->
-            mAdapter?.setRestaurants(list)
-            list_refresh.isRefreshing = false
-        })
+        fetchRestaurantNearBy()
+    }
 
-        mAppNotificationViewModel.observeErrorNotification().observe(this, Observer {
-            list_refresh.isRefreshing = false
-        })
+    override fun onHiddenChanged(hidden: Boolean) {
+        super.onHiddenChanged(hidden)
+        if (!hidden) {
+            fetchRestaurantNearBy()
+        }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        if (mPresenter != null) {
-            lifecycle.removeObserver(mPresenter!!)
-            mPresenter = null
+        binding = null
+    }
+
+    private fun fetchRestaurantNearBy() {
+        restaurantListViewModel.fetchRestaurantNearBy { errResId, errMsg ->
+            appBaseViewModel.setErrorNotification(errorResId = errResId, errorMsg = errMsg)
         }
-        LikedDatabase.destroyInstance()
+    }
+
+    private fun showRestaurantDetail(restaurantId: Long) {
+        viewModel.setState(State.Detail(restaurantId = restaurantId))
     }
 }

@@ -1,3 +1,5 @@
+apply from: '../gradle/externals.gradle'
+
 apply plugin: 'com.android.application'
 
 apply plugin: 'kotlin-android'
@@ -6,9 +8,16 @@ apply plugin: 'kotlin-android-extensions'
 
 apply plugin: 'kotlin-kapt'
 
+apply plugin: 'dagger.hilt.android.plugin'
+
 android {
-    compileSdkVersion 28
-    buildToolsVersion '28.0.3'
+    compileSdkVersion 30
+    buildToolsVersion '29.0.2'
+
+    buildFeatures {
+        viewBinding true
+    }
+
     testOptions {
         unitTests {
             includeAndroidResources = true
@@ -24,10 +33,19 @@ android {
     defaultConfig {
         applicationId "com.ck.doordashproject"
         minSdkVersion 26
-        targetSdkVersion 28
+        targetSdkVersion 30
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments += [
+                        "room.schemaLocation":"$projectDir/schemas".toString(),
+                        "room.incremental":"true",
+                        "room.expandProjection":"true"]
+            }
+        }
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -50,17 +68,34 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation "androidx.appcompat:appcompat:$app_compat"
     implementation "androidx.annotation:annotation:$android_x"
+    implementation "androidx.core:core-ktx:$android_core_ktx"
     implementation "androidx.recyclerview:recyclerview:$android_x"
-    implementation "androidx.lifecycle:lifecycle-common-java8:$android_liftcycle"
+    implementation "androidx.lifecycle:lifecycle-common-java8:$android_x_java"
     implementation "androidx.lifecycle:lifecycle-extensions:$android_liftcycle"
-    implementation "androidx.lifecycle:lifecycle-viewmodel:$android_liftcycle"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$viewmodel_ext"
     implementation "androidx.constraintlayout:constraintlayout:$constraintLayout"
+    implementation "androidx.fragment:fragment-ktx:$fragment_ktx"
     implementation "com.google.android.material:material:$material_design"
+
+    //Live Data
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$live_data"
+
     // Room components
-    implementation "androidx.room:room-runtime:$android_liftcycle"
-    annotationProcessor "androidx.room:room-compiler:$android_liftcycle"
-    kapt "androidx.room:room-compiler:$android_liftcycle"
-    androidTestImplementation "androidx.room:room-testing:$android_liftcycle"
+    implementation "androidx.room:room-runtime:$roomVersion"
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+    annotationProcessor "androidx.room:room-compiler:$roomVersion"
+    implementation "androidx.room:room-rxjava2:$roomVersion"
+    kapt "androidx.room:room-compiler:$roomVersion"
+    androidTestImplementation "androidx.room:room-testing:$roomVersion"
+
+    // Hilt
+    implementation "com.google.dagger:hilt-android:$hilt_version"
+    kapt "com.google.dagger:hilt-android-compiler:$hilt_version"
+
+    //Coroutine
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlin_coroutine"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlin_coroutine"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-rx2:$kotlin_coroutine"
 
     implementation "com.squareup.picasso:picasso:$picasso"
     implementation "com.squareup.okhttp3:okhttp:$okhttp"
@@ -69,21 +104,26 @@ dependencies {
     implementation "com.squareup.retrofit2:converter-gson:$retrofit"
     implementation "com.squareup.retrofit2:adapter-rxjava2:$retrofit"
     implementation "com.google.code.gson:gson:$gson"
+
+    //RX
     implementation "io.reactivex.rxjava2:rxjava:$rxJava"
     implementation "io.reactivex.rxjava2:rxandroid:$rxAndroid"
+    implementation "io.reactivex.rxjava2:rxkotlin:$rxKotlin"
 
-    testImplementation 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.13'
     androidTestImplementation "androidx.test:runner:$testRunner"
     androidTestImplementation "androidx.test:rules:$testRunner"
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 
     testImplementation "com.squareup.assertj:assertj-android:$assertion"
-    testImplementation "org.powermock:powermock-module-junit4:$powerMock"
-    testImplementation "org.powermock:powermock-module-junit4-rule:$powerMock"
-    testImplementation "org.powermock:powermock-api-mockito2:$powerMock"
-    testImplementation "org.powermock:powermock-classloading-xstream:$powerMock"
     testImplementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlin_coroutine_test"
     testImplementation "com.nhaarman:mockito-kotlin:$mockito_kotlin"
     testImplementation "org.amshove.kluent:kluent:$kluent"
+
+    testImplementation "io.mockk:mockk:$mockk"
+    testImplementation "androidx.arch.core:core-testing:$view_model_test"
+    testImplementation "com.google.dagger:hilt-android-testing:$hilt_version"
+    kaptTest "com.google.dagger:hilt-android-compiler:$hilt_version"
 }

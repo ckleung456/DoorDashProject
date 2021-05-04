@@ -1,69 +1,82 @@
 package com.ck.doordashproject.features.dashboard.ui.fragments
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import com.ck.doordashproject.R
-import com.ck.doordashproject.features.dashboard.models.viewmodel.RestaurantViewModel
-import com.ck.doordashproject.features.dashboard.presenter.RestaurantDetailFragmentPresenter
-import com.ck.doordashproject.features.dashboard.presenter.RestaurantDetailFragmentPresenterImpl
-import kotlinx.android.synthetic.main.fragment_restaurat_detail.*
+import com.ck.doordashproject.base.models.AppBaseViewModel
+import com.ck.doordashproject.base.utils.observeEvent
+import com.ck.doordashproject.databinding.FragmentRestauratDetailBinding
+import com.ck.doordashproject.features.dashboard.ui.activity.DashboardActivity.Companion.EXTRA_RESTAURANT_DETAIL
+import com.ck.doordashproject.features.dashboard.viewmodel.RestaurantViewModel
+import com.ck.doordashproject.features.dashboard.viewmodel.RestaurantDetailViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class RestaurantDetailFragment: Fragment() {
     companion object {
         val TAG = RestaurantDetailFragment::class.java.name
-        private const val SOMETHING_WENT_WRONG = "Something went wrong on "
-        fun newInstance(): RestaurantDetailFragment {
-            return RestaurantDetailFragment()
+        fun newInstance(restaurantId: Long) = RestaurantDetailFragment().apply {
+            arguments = bundleOf(
+                EXTRA_RESTAURANT_DETAIL to restaurantId
+            )
         }
     }
 
-    private var mPresenter: RestaurantDetailFragmentPresenter? = null
-    private lateinit var mDetailViewModel: RestaurantViewModel
+    private var binding: FragmentRestauratDetailBinding? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        mDetailViewModel = activity?.run {
-            ViewModelProviders.of(this).get(RestaurantViewModel::class.java)
-        } ?: throw Exception(SOMETHING_WENT_WRONG.plus(TAG))
-        if (mPresenter == null) {
-            mPresenter = RestaurantDetailFragmentPresenterImpl(mDetailViewModel)
-            lifecycle.addObserver(mPresenter!!)
-        }
+    private val detailViewModel: RestaurantDetailViewModel by viewModels()
+    private val appBaseViewModel: AppBaseViewModel by activityViewModels()
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        binding = FragmentRestauratDetailBinding.inflate(inflater, container, false)
+        return binding?.root
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_restaurat_detail, container, false)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        detailViewModel.restaurantDetail.observeEvent(lifecycleOwner = viewLifecycleOwner) { data ->
+            binding?.apply {
+                data.logoDrawable?.let { logo ->
+                    imgRestaurantLabel.setImageDrawable(logo)
+                }
+                data.logoBitmap?.let { bm ->
+                    imgRestaurantLabel.setImageBitmap(bm)
+                }
+                txtRestaurantName.text = data.name
+                txtRestaurantStatus.text = data.status
+                txtRestaurantPhoneNumber.text = getString(R.string.phone_number, data.phoneNumber)
+                txtRestaurantDescription.text = data.description
+                txtRestaurantDeliveryFee.text = getString(R.string.delivery_fee, data.deliveryFee.toString())
+                txtRestaurantYelpRating.text = getString(R.string.yelp_rating, data.yelpRating.toString())
+                txtRestaurantAverageRating.text = getString(R.string.average_rating, data.averageRating.toString())
+            }
+        }
+    }
 
     override fun onStart() {
         super.onStart()
-        mDetailViewModel.observeRestaurantDetail().observe(this, Observer {
-            Log.w(TAG, "set")
-            it.logoDrawable?.let {d ->
-                img_restaurant_label.setImageDrawable(d)
+        detailViewModel.onError = { errResId, errMsg ->
+            appBaseViewModel.setErrorNotification(errResId, errMsg)
+        }
+    }
+
+    override fun onHiddenChanged(hidden: Boolean) {
+        super.onHiddenChanged(hidden)
+        if (!hidden) {
+            arguments?.getLong(EXTRA_RESTAURANT_DETAIL)?.let {
+                detailViewModel.setRestaurantId(id = it)
             }
-            it.logoBitmap?.let { b ->
-                img_restaurant_label.setImageBitmap(b)
-            }
-            txt_restaurant_name.text = it.name
-            txt_restaurant_status.text = it.status
-            txt_restaurant_phone_number.text = getString(R.string.phone_number, it.phoneNumber)
-            txt_restaurant_description.text = it.description
-            txt_restaurant_delivery_fee.text = getString(R.string.delivery_fee, it.deliveryFee.toString())
-            txt_restaurant_yelp_rating.text = getString(R.string.yelp_rating, it.yelpRating.toString())
-            txt_restaurant_average_rating.text = getString(R.string.average_rating, it.averageRating.toString())
-        })
+        }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mPresenter?.apply {
-            lifecycle.removeObserver(mPresenter!!)
-        }
-        mPresenter = null
+        binding = null
     }
 }
