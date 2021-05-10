@@ -2,6 +2,7 @@ package com.ck.doordashproject.features.dashboard.presenter
 
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
+import android.util.Log
 import androidx.annotation.VisibleForTesting
 import com.ck.doordashproject.R
 import com.ck.doordashproject.base.utils.ImageUtils
@@ -13,7 +14,7 @@ import com.squareup.picasso.Target
 
 class RestaurantViewHolderPresenterImpl constructor(
     private val view: RestaurantViewHolderView,
-    private val imageUtils: ImageUtils = ImageUtils(),
+    private val imageUtils: ImageUtils = ImageUtils(Picasso.get()),
     private val showRestaurantDetail: (Long) -> Unit,
     private val setRestaurantLikeStatus: (RestaurantDataModelWrapper) -> Unit
 ) : RestaurantViewHolderPresenter, Target {
@@ -67,6 +68,8 @@ class RestaurantViewHolderPresenterImpl constructor(
     override fun showRestaurantDetail() {
         dataModel?.restaurantData?.id?.let {
             showRestaurantDetail.invoke(it)
+        } ?: kotlin.run {
+            Log.w("Restaurant", "data has not been initialized")
         }
     }
 

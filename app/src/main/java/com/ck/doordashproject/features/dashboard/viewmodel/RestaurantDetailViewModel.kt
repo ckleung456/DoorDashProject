@@ -2,8 +2,10 @@ package com.ck.doordashproject.features.dashboard.viewmodel
 
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.*
 import com.ck.doordashproject.R
+import com.ck.doordashproject.base.models.data.restaurants.RestaurantDetailDataModel
 import com.ck.doordashproject.base.repository.network.RetrofitException
 import com.ck.doordashproject.base.utils.Event
 import com.ck.doordashproject.base.utils.ImageUtils
@@ -49,34 +51,28 @@ class RestaurantDetailViewModel @Inject constructor(
                         },
                         onSuccess = { dataModel ->
                             dataModel.cover_img_url?.let { cover_img_url ->
-                                imageUtils.loadLogo(cover_img_url, object: Target {
+                                imageUtils.loadLogo(imageUrl = cover_img_url, object: Target {
                                     override fun onBitmapLoaded(
                                         bitmap: Bitmap?,
                                         from: Picasso.LoadedFrom?
                                     ) {
-                                        bitmap?.let {
-                                            setViewData(logoBitmap = bitmap)
-                                        }
+                                        sent(logoBitmap = bitmap)
                                     }
 
                                     override fun onBitmapFailed(
                                         e: Exception?,
                                         errorDrawable: Drawable?
                                     ) {
-                                        errorDrawable?.let {
-                                            setViewData(drawable = errorDrawable)
-                                        }
+                                        sent(logoDrawable = errorDrawable)
                                     }
 
                                     override fun onPrepareLoad(placeHolderDrawable: Drawable?) {
-                                        placeHolderDrawable?.let {
-                                            setViewData(drawable = placeHolderDrawable)
-                                        }
+                                        sent(logoDrawable = placeHolderDrawable)
                                     }
 
-                                    private fun setViewData(drawable: Drawable? = null, logoBitmap: Bitmap? = null) {
+                                    private fun sent(logoBitmap: Bitmap? = null, logoDrawable: Drawable? = null) {
                                         fireEvent(RestaurantDetailViewDataModel(
-                                            logoDrawable = drawable,
+                                            logoDrawable = logoDrawable,
                                             logoBitmap = logoBitmap,
                                             name = dataModel.name ?: "",
                                             status = dataModel.status ?: "",
@@ -112,6 +108,7 @@ class RestaurantDetailViewModel @Inject constructor(
     private fun convertCenToDollar(fee: Long): Double = fee / RATIO
 
     companion object {
-        const val RATIO = 100.0
+        @VisibleForTesting
+        internal const val RATIO = 100.0
     }
 }

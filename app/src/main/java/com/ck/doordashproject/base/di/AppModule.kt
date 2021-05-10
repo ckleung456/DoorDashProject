@@ -7,6 +7,7 @@ import com.ck.doordashproject.base.repository.network.RxErrorHandlingCallAdapter
 import com.ck.doordashproject.base.repository.database.LikedDatabase
 import com.ck.doordashproject.base.repository.network.DoorDashAPIs
 import com.google.gson.GsonBuilder
+import com.squareup.picasso.Picasso
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -56,4 +57,8 @@ class AppModule {
 
     @Provides
     fun provideLikedDataDao(db: LikedDatabase) = db.getLikedDataDao()
+
+    @Singleton
+    @Provides
+    fun providePicasso() = Picasso.get()
 }
