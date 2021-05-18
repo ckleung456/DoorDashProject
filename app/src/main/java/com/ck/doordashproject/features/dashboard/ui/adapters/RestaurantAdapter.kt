@@ -25,9 +25,10 @@ class RestaurantAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RestaurantViewHolder =
         RestaurantViewHolder(
-            binding = AdapterRestaurantBinding.bind(
-                LayoutInflater.from(parent.context)
-                    .inflate(R.layout.adapter_restaurant, parent, false)
+            binding = AdapterRestaurantBinding.inflate(
+                LayoutInflater.from(parent.context),
+                parent,
+                false
             ),
             showRestaurantDetail = showRestaurantDetail,
             setRestaurantLikeStatus = setRestaurantLikeStatus
