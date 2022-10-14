@@ -1,49 +1,78 @@
 package com.ck.doordashproject.base.usecase
 
-import io.reactivex.Flowable
-import io.reactivex.Observable
+import com.ck.doordashproject.base.repository.network.RetrofitException
 import io.reactivex.Single
+import io.reactivex.disposables.Disposable
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.reactive.awaitFirst
-import kotlinx.coroutines.rx2.await
-import kotlinx.coroutines.rx2.awaitFirst
 
 interface UseCase<in INPUT, out RESULT> {
-    operator fun invoke(input: INPUT): RESULT
+    operator fun invoke(
+        input: INPUT,
+        onResultFn: (RESULT) -> Unit = {}
+    )
 }
 
-interface CoroutineUseCase<INPUT, RESULT> {
-    suspend operator fun invoke(input: INPUT, dispatchersContext: DispatchersContract = CoroutineDispatchers): RESULT
+interface RxUseCase<in INPUT, out RESULT> {
+    operator fun invoke(
+        input: INPUT,
+        onResultFn: (RESULT) -> Unit = {}
+    ): Disposable
 }
 
-interface SingleUseCase<INPUT, RESULT>: CoroutineUseCase<INPUT, RESULT> {
-    fun getSingle(input: INPUT): Single<RESULT>
-
-    override suspend fun invoke(input: INPUT, dispatchersContext: DispatchersContract): RESULT = getSingle(input).await()
+/**
+ * Use this in worker in most of the case
+ * Use other use cases if possible
+ */
+interface RxSingleUseCase<in INPUT, RESULT> {
+    operator fun invoke(input: INPUT): Single<RESULT>
 }
 
-interface ObservableUseCase<INPUT, RESULT>: CoroutineUseCase<INPUT, RESULT> {
-    fun getObservable(input: INPUT): Observable<RESULT>
-
-    override suspend fun invoke(input: INPUT, dispatchersContext: DispatchersContract): RESULT = getObservable(input).awaitFirst()
+interface CoroutineUseCase<in INPUT, out RESULT> {
+    suspend operator fun invoke(
+        input: INPUT,
+        onResultFn: (RESULT) -> Unit = {}
+    )
 }
 
-interface FlowableUseCase<INPUT, RESULT>: CoroutineUseCase<INPUT, RESULT> {
-    fun getFlowable(input: INPUT): Flowable<RESULT>
+abstract class FlowUseCase<in INPUT, out RESULT>(private val dispatcherMain: CoroutineDispatcher) {
+    /**
+     * Implement this in use case
+     */
+    protected abstract suspend fun getFlow(
+        input: INPUT
+    ): Flow<RESULT>
 
-    override suspend fun invoke(input: INPUT, dispatchersContext: DispatchersContract): RESULT = getFlowable(input).awaitFirst()
+    /**
+     * Implement this method if you need more logic to handle your error and results different RESULT type
+     */
+    protected open suspend fun errorResult(error: Throwable): RESULT? = null
+
+    /**
+     * Call this in view model
+     */
+    suspend operator fun invoke(
+        input: INPUT,
+        onResultFn: (UseCaseOutputWithStatus<RESULT>) -> Unit
+    ) = getFlow(input)
+        .onStart {
+            onResultFn(UseCaseOutputWithStatus.Progress())
+        }
+        .onEach { result ->
+            onResultFn(UseCaseOutputWithStatus.Success(result = result))
+        }
+        .catch { e ->
+            onResultFn(UseCaseOutputWithStatus.Failed(
+                error = if (e is RetrofitException) e else RetrofitException.unexpectedError(exception = e),
+                failedResult = errorResult(error = e)
+            ))
+        }
+        .flowOn(dispatcherMain)
+        .collect()
 }
 
-
-interface DispatchersContract {
-    val IO: CoroutineDispatcher
-    val MAIN: CoroutineDispatcher
-    val DEFAULT: CoroutineDispatcher
-}
-
-object CoroutineDispatchers: DispatchersContract {
-    override val IO = Dispatchers.IO
-    override val MAIN = Dispatchers.Main
-    override val DEFAULT = Dispatchers.Default
+sealed class UseCaseOutputWithStatus<out RESULT> {
+    data class Progress<out RESULT>(val data: Any? = null): UseCaseOutputWithStatus<RESULT>()
+    data class Success<out RESULT>(val result: RESULT): UseCaseOutputWithStatus<RESULT>()
+    data class Failed<out RESULT>(val error: RetrofitException, val failedResult: RESULT? = null): UseCaseOutputWithStatus<RESULT>()
 }

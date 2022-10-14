@@ -11,7 +11,7 @@ apply plugin: 'kotlin-kapt'
 apply plugin: 'dagger.hilt.android.plugin'
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 32
     buildToolsVersion '29.0.2'
 
     buildFeatures {
@@ -33,7 +33,7 @@ android {
     defaultConfig {
         applicationId "com.ck.doordashproject"
         minSdkVersion 26
-        targetSdkVersion 30
+        targetSdkVersion 32
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"

@@ -1,15 +1,33 @@
 package com.ck.doordashproject.features.dashboard.models.repository.network
 
-import androidx.annotation.NonNull
 import com.ck.doordashproject.base.models.data.restaurants.RestaurantDataModel
 import com.ck.doordashproject.base.models.data.restaurants.RestaurantDetailDataModel
-import io.reactivex.Observable
-import io.reactivex.Single
+import com.ck.doordashproject.base.repository.network.DoorDashAPIs
+import dagger.hilt.android.scopes.ViewModelScoped
+import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
 
-interface RestaurantInteractors {
-    @NonNull
-    fun getRestaurantNearBy(lat: Float, lng: Float): Single<List<RestaurantDataModel>>
+@ViewModelScoped
+class RestaurantInteractors @Inject constructor(
+    private val apiService: DoorDashAPIs
+) {
+    companion object {
+        const val OFFSET = 0
+        const val LIMIT = 50
+    }
 
-    @NonNull
-    fun getRestaurantDetail(restaurantId: Long): Single<RestaurantDetailDataModel>
+    fun getRestaurantNearBy(
+        lat: Float,
+        lng: Float
+    ): Flow<List<RestaurantDataModel>> = apiService.fetchRestaurantNearBy(
+        lat = lat,
+        lng = lng,
+        offset = OFFSET,
+        limit = LIMIT
+    )
+
+    fun getRestaurantDetail(restaurantId: Long): Flow<RestaurantDetailDataModel> =
+        apiService.fetchRestaurantDetail(
+            id = restaurantId
+        )
 }

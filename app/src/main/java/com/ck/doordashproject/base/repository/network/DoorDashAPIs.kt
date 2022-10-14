@@ -4,6 +4,7 @@ import com.ck.doordashproject.base.models.data.restaurants.RestaurantDataModel
 import com.ck.doordashproject.base.models.data.restaurants.RestaurantDetailDataModel
 import io.reactivex.Observable
 import io.reactivex.Single
+import kotlinx.coroutines.flow.Flow
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path
@@ -16,8 +17,8 @@ interface DoorDashAPIs {
         @Query(APIConstants.ADDRESS_LNG) lng: Float,
         @Query(APIConstants.OFFSET) offset: Int,
         @Query(APIConstants.LIMIT) limit: Int
-    ): Single<Response<List<RestaurantDataModel>>>
+    ): Flow<List<RestaurantDataModel>>
 
     @GET(APIConstants.ENDPOINT_RESTAURANT_DETAIL)
-    fun fetchRestaurantDetail(@Path(APIConstants.RESTAURANT_ID) id: Long): Single<Response<RestaurantDetailDataModel>>
+    fun fetchRestaurantDetail(@Path(APIConstants.RESTAURANT_ID) id: Long): Flow<RestaurantDetailDataModel>
 }

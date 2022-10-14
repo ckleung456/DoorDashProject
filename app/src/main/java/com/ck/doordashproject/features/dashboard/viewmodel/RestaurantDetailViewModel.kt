@@ -7,6 +7,7 @@ import androidx.lifecycle.*
 import com.ck.doordashproject.R
 import com.ck.doordashproject.base.models.data.restaurants.RestaurantDetailDataModel
 import com.ck.doordashproject.base.repository.network.RetrofitException
+import com.ck.doordashproject.base.usecase.UseCaseOutputWithStatus
 import com.ck.doordashproject.base.utils.Event
 import com.ck.doordashproject.base.utils.ImageUtils
 import com.ck.doordashproject.base.utils.fireEvent
@@ -19,6 +20,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.subscribeBy
+import kotlinx.coroutines.launch
 import java.lang.Exception
 import javax.inject.Inject
 
@@ -34,66 +36,77 @@ class RestaurantDetailViewModel @Inject constructor(
     lateinit var onError: (Int?, String?) -> Unit
 
     val restaurantDetail: LiveData<Event<RestaurantDetailViewDataModel>> = MediatorLiveData<Event<RestaurantDetailViewDataModel>>().apply {
-        fun update() {
+        suspend fun update() {
             detailRestaurantId.value?.let {
                 getRestaurantDetailUseCase
-                    .getSingle(input = GetRestaurantDetailUseCase.Input(restaurantId = it))
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribeBy(
-                        onError = { e ->
-                            if (e is RetrofitException) {
-                                if (e.getKind() == RetrofitException.Kind.NETWORK) {
-                                    onError.invoke(R.string.network_error, null)
-                                } else if (e.getKind() == RetrofitException.Kind.HTTP) {
-                                    onError.invoke(null, e.message)
+                    .invoke(
+                        input = GetRestaurantDetailUseCase.Input(restaurantId = it)
+                    ) { result ->
+                        when (result) {
+                            is UseCaseOutputWithStatus.Progress -> { }
+                            is UseCaseOutputWithStatus.Failed -> {
+                                val error = result.error
+                                if (error is RetrofitException) {
+                                    if (error.getKind() == RetrofitException.Kind.NETWORK) {
+                                        onError.invoke(R.string.network_error, null)
+                                    } else if (error.getKind() == RetrofitException.Kind.HTTP) {
+                                        onError.invoke(null, error.message)
+                                    }
                                 }
                             }
-                        },
-                        onSuccess = { dataModel ->
-                            dataModel.cover_img_url?.let { cover_img_url ->
-                                imageUtils.loadLogo(imageUrl = cover_img_url, object: Target {
-                                    override fun onBitmapLoaded(
-                                        bitmap: Bitmap?,
-                                        from: Picasso.LoadedFrom?
-                                    ) {
-                                        sent(logoBitmap = bitmap)
-                                    }
+                            is UseCaseOutputWithStatus.Success -> {
+                                val dataModel = result.result
+                                dataModel.cover_img_url?.let { cover_img_url ->
+                                    imageUtils.loadLogo(imageUrl = cover_img_url, object: Target {
+                                        override fun onBitmapLoaded(
+                                            bitmap: Bitmap?,
+                                            from: Picasso.LoadedFrom?
+                                        ) {
+                                            sent(logoBitmap = bitmap)
+                                        }
 
-                                    override fun onBitmapFailed(
-                                        e: Exception?,
-                                        errorDrawable: Drawable?
-                                    ) {
-                                        sent(logoDrawable = errorDrawable)
-                                    }
+                                        override fun onBitmapFailed(
+                                            e: Exception?,
+                                            errorDrawable: Drawable?
+                                        ) {
+                                            sent(logoDrawable = errorDrawable)
+                                        }
 
-                                    override fun onPrepareLoad(placeHolderDrawable: Drawable?) {
-                                        sent(logoDrawable = placeHolderDrawable)
-                                    }
+                                        override fun onPrepareLoad(placeHolderDrawable: Drawable?) {
+                                            sent(logoDrawable = placeHolderDrawable)
+                                        }
 
-                                    private fun sent(logoBitmap: Bitmap? = null, logoDrawable: Drawable? = null) {
-                                        fireEvent(RestaurantDetailViewDataModel(
-                                            logoDrawable = logoDrawable,
-                                            logoBitmap = logoBitmap,
-                                            name = dataModel.name ?: "",
-                                            status = dataModel.status ?: "",
-                                            phoneNumber = dataModel.phone_number ?: "",
-                                            description = dataModel.description ?: "",
-                                            yelpRating = dataModel.yelp_rating ?: 0.0,
-                                            deliveryFee = dataModel.delivery_fee?.let { fee ->
-                                                convertCenToDollar(fee)
-                                            } ?: 0.0,
-                                            averageRating = dataModel.average_rating ?: 0.0
-                                        ))
-                                    }
-                                })
+                                        private fun sent(logoBitmap: Bitmap? = null, logoDrawable: Drawable? = null) {
+                                            fireEvent(RestaurantDetailViewDataModel(
+                                                logoDrawable = logoDrawable,
+                                                logoBitmap = logoBitmap,
+                                                name = dataModel.name ?: "",
+                                                status = dataModel.status ?: "",
+                                                phoneNumber = dataModel.phone_number ?: "",
+                                                description = dataModel.description ?: "",
+                                                yelpRating = dataModel.yelp_rating ?: 0.0,
+                                                deliveryFee = dataModel.delivery_fee?.let { fee ->
+                                                    convertCenToDollar(fee)
+                                                } ?: 0.0,
+                                                averageRating = dataModel.average_rating ?: 0.0
+                                            ))
+                                        }
+                                    })
+                                }
                             }
                         }
-                    )
+                    }
             }
         }
 
-        addSource(detailRestaurantId) { update() }
-        update()
+        addSource(detailRestaurantId) {
+            viewModelScope.launch {
+                update()
+            }
+        }
+        viewModelScope.launch {
+            update()
+        }
     }.distinctUntilChanged()
 
     override fun onCleared() {

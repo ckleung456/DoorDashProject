@@ -6,6 +6,7 @@ import com.ck.doordashproject.base.repository.network.APIConstants
 import com.ck.doordashproject.base.repository.network.RxErrorHandlingCallAdapterFactory
 import com.ck.doordashproject.base.repository.database.LikedDatabase
 import com.ck.doordashproject.base.repository.network.DoorDashAPIs
+import com.ck.doordashproject.base.repository.network.FlowErrorHandlingCallAdapterFactory
 import com.google.gson.GsonBuilder
 import com.squareup.picasso.Picasso
 import dagger.Module
@@ -14,6 +15,8 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.reactivex.disposables.CompositeDisposable
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -41,7 +44,7 @@ class AppModule {
             ).build()
         )
         .baseUrl(APIConstants.SERVER_API_ENDPOINT + "/")
-        .addCallAdapterFactory(RxErrorHandlingCallAdapterFactory.create())
+        .addCallAdapterFactory(FlowErrorHandlingCallAdapterFactory())
         .addConverterFactory(GsonConverterFactory.create(GsonBuilder().setLenient().create()))
         .build()
         .create(DoorDashAPIs::class.java)
@@ -61,4 +64,25 @@ class AppModule {
     @Singleton
     @Provides
     fun providePicasso() = Picasso.get()
+
+    @DispatcherMain
+    @Singleton
+    @Provides
+    fun provideDispatcherMain(): CoroutineDispatcher {
+        return Dispatchers.Main
+    }
+
+    @DispatcherIO
+    @Singleton
+    @Provides
+    fun provideDispatcherIO(): CoroutineDispatcher {
+        return Dispatchers.IO
+    }
+
+    @DispatcherDefault
+    @Singleton
+    @Provides
+    fun provideDispatcherDefault(): CoroutineDispatcher {
+        return Dispatchers.Main
+    }
 }
